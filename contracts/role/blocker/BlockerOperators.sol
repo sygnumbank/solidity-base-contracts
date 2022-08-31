@@ -4,9 +4,9 @@
  * @dev For managing account privileges associated to blocking of DCHF and equity tokens: blockers.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
-import "openzeppelin-solidity/contracts/access/Roles.sol";
+import "../Roles.sol";
 import "../base/Operatorable.sol";
 import "./BlockerOperatorable.sol";
 
@@ -35,18 +35,18 @@ contract BlockerOperators is Operatorable {
     }
 
     /**
-     * @dev Operator or relay can give '_account' address blocker privileges.
+     * @dev Operator, admin, or relay can give '_account' address blocker privileges.
      * @param _account address that should be given blocker privileges.
      */
-    function addBlocker(address _account) public onlyOperatorOrRelay {
+    function addBlocker(address _account) public onlyOperatorOrAdminOrRelay {
         _addBlocker(_account);
     }
 
     /**
-     * @dev Operator or relay can revoke '_account' address blocker privileges.
+     * @dev Operator, admin, or relay can revoke '_account' address blocker privileges.
      * @param _account address that should be revoked blocker privileges.
      */
-    function removeBlocker(address _account) public onlyOperatorOrRelay {
+    function removeBlocker(address _account) public onlyOperatorOrAdminOrRelay {
         _removeBlocker(_account);
     }
 

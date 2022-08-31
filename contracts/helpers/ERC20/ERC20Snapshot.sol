@@ -1,11 +1,13 @@
+// SPDX-License-Identifier: UNLICENSED
+
 /**
  * @title ERC20Snapshot
  * @author Team 3301 <team3301@sygnum.com>
  * @notice Records historical balances.
  */
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./ERC20Overload/ERC20.sol";
 
 contract ERC20Snapshot is ERC20 {
@@ -103,7 +105,7 @@ contract ERC20Snapshot is ERC20 {
      * @param to The account that will receive the created tokens.
      * @param value The amount that will be created.
      */
-    function transfer(address to, uint256 value) public returns (bool result) {
+    function transfer(address to, uint256 value) public virtual override returns (bool result) {
         result = super.transfer(to, value);
         updateValueAtNow(_snapshotTotalSupply, totalSupply());
         updateValueAtNow(_snapshotBalances[msg.sender], balanceOf(msg.sender));
@@ -122,7 +124,7 @@ contract ERC20Snapshot is ERC20 {
         address from,
         address to,
         uint256 value
-    ) public returns (bool result) {
+    ) public virtual override returns (bool result) {
         result = super.transferFrom(from, to, value);
         updateValueAtNow(_snapshotTotalSupply, totalSupply());
         updateValueAtNow(_snapshotBalances[from], balanceOf(from));
@@ -141,7 +143,7 @@ contract ERC20Snapshot is ERC20 {
         address confiscatee,
         address receiver,
         uint256 amount
-    ) internal {
+    ) internal virtual {
         super._transfer(confiscatee, receiver, amount);
         updateValueAtNow(_snapshotTotalSupply, totalSupply());
         updateValueAtNow(_snapshotBalances[confiscatee], balanceOf(confiscatee));
@@ -155,7 +157,7 @@ contract ERC20Snapshot is ERC20 {
      * @param account The account that will receive the created tokens.
      * @param amount The amount that will be created.
      */
-    function _mint(address account, uint256 amount) internal {
+    function _mint(address account, uint256 amount) internal virtual override {
         super._mint(account, amount);
         updateValueAtNow(_snapshotTotalSupply, totalSupply());
         updateValueAtNow(_snapshotBalances[account], balanceOf(account));
@@ -167,7 +169,7 @@ contract ERC20Snapshot is ERC20 {
      * @param account The account whose tokens will be burnt.
      * @param amount The amount that will be burnt.
      */
-    function _burn(address account, uint256 amount) internal {
+    function _burn(address account, uint256 amount) internal virtual override {
         super._burn(account, amount);
         updateValueAtNow(_snapshotTotalSupply, totalSupply());
         updateValueAtNow(_snapshotBalances[account], balanceOf(account));
@@ -179,7 +181,7 @@ contract ERC20Snapshot is ERC20 {
      * @param account The account whose tokens will be burnt.
      * @param amount The amount that will be burnt.
      */
-    function _burnFor(address account, uint256 amount) internal {
+    function _burnFor(address account, uint256 amount) internal virtual {
         super._burn(account, amount);
         updateValueAtNow(_snapshotTotalSupply, totalSupply());
         updateValueAtNow(_snapshotBalances[account], balanceOf(account));
@@ -192,7 +194,7 @@ contract ERC20Snapshot is ERC20 {
      * @param account The account whose tokens will be burnt.
      * @param amount The amount that will be burnt.
      */
-    function _burnFrom(address account, uint256 amount) internal {
+    function _burnFrom(address account, uint256 amount) internal virtual override {
         super._burnFrom(account, amount);
         updateValueAtNow(_snapshotTotalSupply, totalSupply());
         updateValueAtNow(_snapshotBalances[account], balanceOf(account));

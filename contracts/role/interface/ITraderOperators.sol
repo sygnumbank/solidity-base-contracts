@@ -3,12 +3,12 @@
  * @notice Interface for TraderOperators contract
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
-contract ITraderOperators {
-    function isTrader(address _account) external view returns (bool);
+abstract contract ITraderOperators {
+    function isTrader(address _account) external view virtual returns (bool);
 
-    function addTrader(address _account) external;
+    function addTrader(address _account) external virtual;
 
-    function removeTrader(address _account) external;
+    function removeTrader(address _account) external virtual;
 }

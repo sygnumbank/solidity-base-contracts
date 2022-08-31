@@ -12,7 +12,7 @@ contract("TraderOperators", ([admin, operator, trader, relay, attacker]) => {
 
   context("contract initialization", () => {
     it("revert traderOperators initialization with zero address", async () => {
-      await expectRevert(this.traderOperators.initialize(ZERO_ADDRESS, { from: admin }), "Operatorable: address of new operators contract cannot be zero");
+      await expectRevert(this.traderOperators.initialize(ZERO_ADDRESS, { from: admin }), "OperatorableNewOperatorsZeroAddress()");
     });
   });
 
@@ -24,25 +24,25 @@ contract("TraderOperators", ([admin, operator, trader, relay, attacker]) => {
     describe("non-functional", () => {
       describe("from operator", () => {
         it("revert removing non-existing trader", async () => {
-          await expectRevert(this.traderOperators.removeTrader(trader, { from: admin }), "Roles: account does not have role");
+          await expectRevert(this.traderOperators.removeTrader(trader, { from: admin }), `RolesAccountDoesNotHaveRole("${trader}")`);
         });
         it("revert removing trader with zero addr", async () => {
-          await expectRevert(this.traderOperators.removeTrader(ZERO_ADDRESS, { from: admin }), "Roles: account is the zero address");
+          await expectRevert(this.traderOperators.removeTrader(ZERO_ADDRESS, { from: admin }), "RolesAccountIsZeroAddress()");
         });
         it("revert adding trader with zero addr", async () => {
-          await expectRevert(this.traderOperators.addTrader(ZERO_ADDRESS, { from: admin }), "Roles: account is the zero address");
+          await expectRevert(this.traderOperators.addTrader(ZERO_ADDRESS, { from: admin }), "RolesAccountIsZeroAddress()");
         });
       });
       describe("from attacker", () => {
         it("revert adding trader", async () => {
-          await expectRevert(this.traderOperators.addTrader(trader, { from: attacker }), "Operatorable: caller does not have the admin role nor relay");
+          await expectRevert(this.traderOperators.addTrader(trader, { from: attacker }), "OperatorableCallerNotAdminOrRelay()");
         });
         describe("revert removing trader", () => {
           beforeEach(async () => {
             await this.traderOperators.addTrader(trader, { from: admin });
           });
           it("reverts", async () => {
-            await expectRevert(this.traderOperators.removeTrader(trader, { from: attacker }), "Operatorable: caller does not have the admin role nor relay");
+            await expectRevert(this.traderOperators.removeTrader(trader, { from: attacker }), "OperatorableCallerNotAdminOrRelay()");
           });
         });
       });

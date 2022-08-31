@@ -1,4 +1,4 @@
-pragma solidity 0.5.12;
+// SPDX-License-Identifier: UNLICENSED
 
 /**
  * @title Initializable
@@ -12,6 +12,9 @@ pragma solidity 0.5.12;
  * a parent initializer twice, or ensure that all initializers are idempotent,
  * because this is not dealt with automatically as with constructors.
  */
+
+pragma solidity ^0.8.0;
+
 contract Initializable {
     /**
      * @dev Indicates that the contract has been initialized.
@@ -24,13 +27,15 @@ contract Initializable {
     bool private initializing;
 
     /**
+     * @dev Error: "Initializable: Contract instance has already been initialized"
+     */
+    error InitializableContractAlreadyInitialized();
+
+    /**
      * @dev Modifier to use in the initializer function of a contract.
      */
     modifier initializer() {
-        require(
-            initializing || isConstructor() || !initialized,
-            "Initializable: Contract instance has already been initialized"
-        );
+        if (!initializing && !isConstructor() && initialized) revert InitializableContractAlreadyInitialized();
 
         bool isTopLevelCall = !initializing;
         if (isTopLevelCall) {
@@ -52,15 +57,16 @@ contract Initializable {
         // deployed when running a constructor, any checks on its code size will
         // yield zero, making it an effective way to detect if a contract is
         // under construction or not.
+        address self = address(this);
         uint256 cs;
-        // solhint-disable-next-line
+        // solhint-disable-next-line no-inline-assembly
         assembly {
-            cs := extcodesize(address)
+            cs := extcodesize(self)
         }
         return cs == 0;
     }
 
-    function isInitialized() public view returns (bool) {
+    function isInitialized() public view virtual returns (bool) {
         return initialized;
     }
 

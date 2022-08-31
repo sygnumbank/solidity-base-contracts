@@ -1,6 +1,6 @@
 const { ethers } = require("ethers");
 
-const BigNumber = ethers.utils.bigNumberify;
+const BigNumber = ethers.BigNumber.from;
 
 const Three = new BigNumber("3");
 const Four = new BigNumber("4");

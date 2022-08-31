@@ -5,7 +5,7 @@
  *      contracts.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "../interface/ITraderOperators.sol";
 import "../base/Operatorable.sol";
@@ -15,6 +15,31 @@ contract TraderOperatorable is Operatorable {
     ITraderOperators internal traderOperatorsInst;
     address private traderOperatorsPending;
 
+    /**
+     * @dev Error: "TraderOperatorable: caller is not trader"
+     */
+    error TraderOperatorableCallerNotTrader();
+
+    /**
+     * @dev Error: "TraderOperatorable: caller is not trader or operator or system"
+     */
+    error TraderOperatorableCallerNotTraderOrOperatorOrSystem();
+
+    /**
+     * @dev Error: "TraderOperatorable: address of new traderOperators contract can not be zero"
+     */
+    error TraderOperatorableNewTraderOperatorsAddressZero();
+
+    /**
+     * @dev Error: "TraderOperatorable: address of pending traderOperators contract can not be zero"
+     */
+    error TraderOperatorablePendingTraderOperatorsAddressZero();
+
+    /**
+     * @dev Error: "TraderOperatorable: should be called from new traderOperators contract"
+     */
+    error TraderOperatorableCallerNotNewTraderOperator();
+
     event TraderOperatorsContractChanged(address indexed caller, address indexed traderOperatorsAddress);
     event TraderOperatorsContractPending(address indexed caller, address indexed traderOperatorsAddress);
 
@@ -22,7 +47,7 @@ contract TraderOperatorable is Operatorable {
      * @dev Reverts if sender does not have the trader role associated.
      */
     modifier onlyTrader() {
-        require(isTrader(msg.sender), "TraderOperatorable: caller is not trader");
+        if (!isTrader(msg.sender)) revert TraderOperatorableCallerNotTrader();
         _;
     }
 
@@ -30,10 +55,8 @@ contract TraderOperatorable is Operatorable {
      * @dev Reverts if sender does not have the operator or trader role associated.
      */
     modifier onlyOperatorOrTraderOrSystem() {
-        require(
-            isOperator(msg.sender) || isTrader(msg.sender) || isSystem(msg.sender),
-            "TraderOperatorable: caller is not trader or operator or system"
-        );
+        if (!isOperator(msg.sender) && !isTrader(msg.sender) && !isSystem(msg.sender))
+            revert TraderOperatorableCallerNotTraderOrOperatorOrSystem();
         _;
     }
 
@@ -43,7 +66,7 @@ contract TraderOperatorable is Operatorable {
      * @param _baseOperators BaseOperators contract address.
      * @param _traderOperators TraderOperators contract address.
      */
-    function initialize(address _baseOperators, address _traderOperators) public initializer {
+    function initialize(address _baseOperators, address _traderOperators) public virtual initializer {
         super.initialize(_baseOperators);
         _setTraderOperatorsContract(_traderOperators);
     }
@@ -55,10 +78,8 @@ contract TraderOperatorable is Operatorable {
      * @param _traderOperators TradeOperators contract address.
      */
     function setTraderOperatorsContract(address _traderOperators) public onlyAdmin {
-        require(
-            _traderOperators != address(0),
-            "TraderOperatorable: address of new traderOperators contract can not be zero"
-        );
+        if (_traderOperators == address(0)) revert TraderOperatorableNewTraderOperatorsAddressZero();
+
         traderOperatorsPending = _traderOperators;
         emit TraderOperatorsContractPending(msg.sender, _traderOperators);
     }
@@ -68,14 +89,9 @@ contract TraderOperatorable is Operatorable {
      *       is the real contract address.
      */
     function confirmTraderOperatorsContract() public {
-        require(
-            traderOperatorsPending != address(0),
-            "TraderOperatorable: address of pending traderOperators contract can not be zero"
-        );
-        require(
-            msg.sender == traderOperatorsPending,
-            "TraderOperatorable: should be called from new traderOperators contract"
-        );
+        if (traderOperatorsPending == address(0)) revert TraderOperatorablePendingTraderOperatorsAddressZero();
+        if (msg.sender != traderOperatorsPending) revert TraderOperatorableCallerNotNewTraderOperator();
+
         _setTraderOperatorsContract(traderOperatorsPending);
     }
 
@@ -102,10 +118,8 @@ contract TraderOperatorable is Operatorable {
 
     /** INTERNAL FUNCTIONS */
     function _setTraderOperatorsContract(address _traderOperators) internal {
-        require(
-            _traderOperators != address(0),
-            "TraderOperatorable: address of new traderOperators contract can not be zero"
-        );
+        if (_traderOperators == address(0)) revert TraderOperatorableNewTraderOperatorsAddressZero();
+
         traderOperatorsInst = ITraderOperators(_traderOperators);
         emit TraderOperatorsContractChanged(msg.sender, _traderOperators);
     }

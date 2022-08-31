@@ -19,7 +19,7 @@ contract("TraderOperatorableMock", ([admin, operator, trader, system, attacker])
     });
     describe("non-functional", () => {
       it("reverts when not trader", async () => {
-        await expectRevert(this.traderOperatorableMock.traderAction({ from: attacker }), "TraderOperatorable: caller is not trader");
+        await expectRevert(this.traderOperatorableMock.traderAction({ from: attacker }), "TraderOperatorableCallerNotTrader()");
       });
     });
     describe("functional", () => {

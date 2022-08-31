@@ -21,13 +21,13 @@ contract("Whitelistable", ([owner, admin, operator, whitelisted, attacker]) => {
           it("revert initialization with zero whitelist address", async () => {
             await expectRevert(
               this.whitelistable.initialize(this.baseOperators.address, ZERO_ADDRESS, { from: operator }),
-              "Whitelistable: address of new whitelist contract cannot be zero"
+              "WhitelistableWhitelistContractZeroAddress()"
             );
           });
           it("revert initialization with zero baseOperators address", async () => {
             await expectRevert(
               this.whitelistable.initialize(ZERO_ADDRESS, this.baseOperators.address, { from: operator }),
-              "Operatorable: address of new operators contract cannot be zero"
+              "OperatorableNewOperatorsZeroAddress()"
             );
           });
         });
@@ -62,7 +62,7 @@ contract("Whitelistable", ([owner, admin, operator, whitelisted, attacker]) => {
             it("can not be initialized twice", async () => {
               await expectRevert(
                 this.whitelistable.initialize(this.baseOperators.address, this.whitelist.address),
-                "Initializable: Contract instance has already been initialized"
+                "InitializableContractAlreadyInitialized()"
               );
             });
           });
@@ -76,25 +76,16 @@ contract("Whitelistable", ([owner, admin, operator, whitelisted, attacker]) => {
       });
       describe("non-functional", () => {
         it("revert attacker init changing", async () => {
-          await expectRevert(
-            this.whitelistable.setWhitelistContract(this.whitelistNew.address, { from: attacker }),
-            "Operatorable: caller does not have the admin role"
-          );
+          await expectRevert(this.whitelistable.setWhitelistContract(this.whitelistNew.address, { from: attacker }), "OperatorableCallerNotAdmin()");
         });
         it("revert admin pass zero addr for new contract", async () => {
-          await expectRevert(
-            this.whitelistable.setWhitelistContract(ZERO_ADDRESS, { from: admin }),
-            "Whitelistable: address of new whitelist contract can not be zero"
-          );
+          await expectRevert(this.whitelistable.setWhitelistContract(ZERO_ADDRESS, { from: admin }), "WhitelistableWhitelistContractZeroAddress()");
         });
       });
       context("two step logic for changing whitelist contract address in Whitelist instance", () => {
         describe("when pending contract not set", () => {
           it("revert confirm", async () => {
-            await expectRevert(
-              this.whitelistable.confirmWhitelistContract({ from: admin }),
-              "Whitelistable: address of new whitelist contract can not be zero"
-            );
+            await expectRevert(this.whitelistable.confirmWhitelistContract({ from: admin }), "WhitelistableWhitelistContractZeroAddress()");
           });
         });
         describe("when pending contract set", () => {
@@ -104,16 +95,13 @@ contract("Whitelistable", ([owner, admin, operator, whitelisted, attacker]) => {
           });
           describe("non-functional", () => {
             it("revert caller not admin - he can not confirm (the second step)", async () => {
-              await expectRevert(
-                this.whitelistNew.confirmFor(this.whitelistable.address, { from: attacker }),
-                "Operatorable: caller does not have the admin role"
-              );
+              await expectRevert(this.whitelistNew.confirmFor(this.whitelistable.address, { from: attacker }), "OperatorableCallerNotAdmin()");
             });
             it("revert confirmation if caller is not pending whitelist contract address", async () => {
-              await expectRevert(this.whitelistable.confirmWhitelistContract({ from: admin }), "Whitelistable: should be called from new whitelist contract");
+              await expectRevert(this.whitelistable.confirmWhitelistContract({ from: admin }), `WhitelistableCallerNotWhitelistContract("${admin}")`);
             });
             it("revert confirmation address equal to zero", async () => {
-              await expectRevert(this.whitelistNew.confirmFor(ZERO_ADDRESS, { from: admin }), "Whitelist: address cannot be empty");
+              await expectRevert(this.whitelistNew.confirmFor(ZERO_ADDRESS, { from: admin }), "WhitelistInvalidAddress()");
             });
             describe("broken contract address", () => {
               it("revert admin finishing second step - @TODO does not give correct revert code ", async () => {

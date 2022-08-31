@@ -1,10 +1,12 @@
+// SPDX-License-Identifier: UNLICENSED
+
 /**
  * @title ERC20Destroyable
  * @author Team 3301 <team3301@sygnum.com>
  * @notice Allows operator to destroy contract.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "../../role/base/Operatorable.sol";
 

@@ -25,5 +25,12 @@ node_modules
 # truffle
 .node-xmlhttprequest-*
 
+# hardhat-deploy
+deployments
+
 build/*
 flattened/*
+
+package-lock.json
+artifacts/
+cache/

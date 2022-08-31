@@ -104,7 +104,7 @@ contract("InitializeRouter", ([admin, attacker]) => {
                 this.whitelist.address,
                 { from: attacker }
               ),
-              "Operatorable: caller does not have the admin role"
+              "OperatorableCallerNotAdmin()"
             );
           });
         });

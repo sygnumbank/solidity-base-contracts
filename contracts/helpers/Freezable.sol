@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: UNLICENSED
+
 /**
  * @title Freezable
  * @author Team 3301 <team3301@sygnum.com>
@@ -5,12 +7,32 @@
  *       by operators in Operatorable contract which is initialized with the relevant BaseOperators address.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "../role/base/Operatorable.sol";
 
 contract Freezable is Operatorable {
     mapping(address => bool) public frozen;
+
+    /**
+     * @dev Error: "Freezable: Empty address"
+     */
+    error FreezableZeroAddress();
+
+    /**
+     * @dev Error: "Freezable: account is frozen"
+     */
+    error FreezableAccountFrozen();
+
+    /**
+     * @dev Error: "Freezable: account is not frozen"
+     */
+    error FreezableAccountNotFrozen();
+
+    /**
+     * @dev Error: "Freezable: batch count is greater than 256"
+     */
+    error FreezableBatchCountTooLarge(uint256 _batchCount);
 
     event FreezeToggled(address indexed account, bool frozen);
 
@@ -19,7 +41,7 @@ contract Freezable is Operatorable {
      * @param _address address to validate.
      */
     modifier onlyValidAddress(address _address) {
-        require(_address != address(0), "Freezable: Empty address");
+        if (_address == address(0)) revert FreezableZeroAddress();
         _;
     }
 
@@ -28,7 +50,7 @@ contract Freezable is Operatorable {
      * @param _account address to validate is not frozen.
      */
     modifier whenNotFrozen(address _account) {
-        require(!frozen[_account], "Freezable: account is frozen");
+        if (frozen[_account]) revert FreezableAccountFrozen();
         _;
     }
 
@@ -37,7 +59,7 @@ contract Freezable is Operatorable {
      * @param _account address to validate is frozen.
      */
     modifier whenFrozen(address _account) {
-        require(frozen[_account], "Freezable: account is not frozen");
+        if (!frozen[_account]) revert FreezableAccountNotFrozen();
         _;
     }
 
@@ -46,7 +68,7 @@ contract Freezable is Operatorable {
      * @param _account address to determine if frozen or not.
      * @return bool is frozen
      */
-    function isFrozen(address _account) public view returns (bool) {
+    function isFrozen(address _account) public view virtual returns (bool) {
         return frozen[_account];
     }
 
@@ -55,7 +77,7 @@ contract Freezable is Operatorable {
      * @param _account address to toggle.
      * @param _toggled freeze/unfreeze.
      */
-    function toggleFreeze(address _account, bool _toggled) public onlyValidAddress(_account) onlyOperator {
+    function toggleFreeze(address _account, bool _toggled) public virtual onlyValidAddress(_account) onlyOperator {
         frozen[_account] = _toggled;
         emit FreezeToggled(_account, _toggled);
     }
@@ -65,9 +87,10 @@ contract Freezable is Operatorable {
      * @param _addresses address array.
      * @param _toggled freeze/unfreeze.
      */
-    function batchToggleFreeze(address[] memory _addresses, bool _toggled) public {
-        require(_addresses.length <= 256, "Freezable: batch count is greater than 256");
-        for (uint256 i = 0; i < _addresses.length; i++) {
+    function batchToggleFreeze(address[] memory _addresses, bool _toggled) public virtual {
+        if (_addresses.length > 256) revert FreezableBatchCountTooLarge(_addresses.length);
+
+        for (uint256 i = 0; i < _addresses.length; ++i) {
             toggleFreeze(_addresses[i], _toggled);
         }
     }

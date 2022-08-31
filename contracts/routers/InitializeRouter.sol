@@ -4,7 +4,7 @@
  * @dev InitializeRouter contract, that allows one individual transaction to initialize all role contracts.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "../role/base/Operatorable.sol";
 import "../helpers/interface/IInitialize.sol";

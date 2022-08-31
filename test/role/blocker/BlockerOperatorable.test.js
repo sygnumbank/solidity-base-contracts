@@ -15,7 +15,7 @@ contract("BlockerOperatorable", ([owner, admin, operator, attacker]) => {
       it("revert blockerOperatorable initialization with zero address", async () => {
         await expectRevert(
           this.blockerOperatorable.initialize(this.baseOperators.address, ZERO_ADDRESS, { from: operator }),
-          "BlockerOperatorable: address of new blockerOperators contract can not be zero"
+          "BlockerOperatorableNewBlockerOperatorsAddressZero()"
         );
       });
     });
@@ -34,10 +34,7 @@ contract("BlockerOperatorable", ([owner, admin, operator, attacker]) => {
         });
         describe("non-functional", () => {
           it("can not be initialized twice", async () => {
-            await expectRevert(
-              this.blockerOperatorable.initialize(this.blockerOperators.address),
-              "Initializable: Contract instance has already been initialized"
-            );
+            await expectRevert(this.blockerOperatorable.initialize(this.blockerOperators.address), "InitializableContractAlreadyInitialized()");
           });
         });
       });
@@ -53,19 +50,19 @@ contract("BlockerOperatorable", ([owner, admin, operator, attacker]) => {
       it("revert attacker init changing", async () => {
         await expectRevert(
           this.blockerOperatorable.setBlockerOperatorsContract(this.blockerOperatorsNew.address, { from: attacker }),
-          "Operatorable: caller does not have the admin role"
+          "OperatorableCallerNotAdmin()"
         );
       });
       it("revert admin pass zero addr for new contract", async () => {
         await expectRevert(
           this.blockerOperatorable.setBlockerOperatorsContract(ZERO_ADDRESS, { from: admin }),
-          "BlockerOperatorable: address of new blockerOperators contract can not be zero"
+          "BlockerOperatorableNewBlockerOperatorsAddressZero()"
         );
       });
       it("revert blockerOperators confirm for zero address", async () => {
         await expectRevert(
           this.blockerOperatorable.setBlockerOperatorsContract(ZERO_ADDRESS, { from: admin }),
-          "BlockerOperatorable: address of new blockerOperators contract can not be zero"
+          "BlockerOperatorableNewBlockerOperatorsAddressZero()"
         );
       });
     });
@@ -75,7 +72,7 @@ contract("BlockerOperatorable", ([owner, admin, operator, attacker]) => {
         it("revert confirm", async () => {
           await expectRevert(
             this.blockerOperatorable.confirmBlockerOperatorsContract({ from: admin }),
-            "BlockerOperatorable: address of pending blockerOperators contract can not be zero"
+            "BlockerOperatorablePendingBlockerOperatorsAddressZero()"
           );
         });
       });
@@ -86,16 +83,10 @@ contract("BlockerOperatorable", ([owner, admin, operator, attacker]) => {
         });
         describe("non-functional", () => {
           it("revert caller not admin - he can not confirm (the second step)", async () => {
-            await expectRevert(
-              this.blockerOperatorsNew.confirmFor(this.blockerOperatorable.address, { from: attacker }),
-              "Operatorable: caller does not have the admin role"
-            );
+            await expectRevert(this.blockerOperatorsNew.confirmFor(this.blockerOperatorable.address, { from: attacker }), "OperatorableCallerNotAdmin()");
           });
           it("revert confirmation if caller is not pending blockerOperators contract address", async () => {
-            await expectRevert(
-              this.blockerOperatorable.confirmBlockerOperatorsContract({ from: admin }),
-              "BlockerOperatorable: should be called from new blockerOperators contract"
-            );
+            await expectRevert(this.blockerOperatorable.confirmBlockerOperatorsContract({ from: admin }), "BlockerOperatorableCallerNotNewBlockerOperator()");
           });
 
           describe("broken contract address", () => {

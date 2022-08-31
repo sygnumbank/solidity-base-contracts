@@ -19,7 +19,7 @@ contract("WhitelistableMock", ([admin, operator, whitelisted, notWhitelisted, at
     describe("whitelisted action", () => {
       describe("non-functional", () => {
         it("reverts when not whitelisted", async () => {
-          await expectRevert(this.mock.whitelistedAction({ from: attacker }), "Whitelistable: account is not whitelisted");
+          await expectRevert(this.mock.whitelistedAction({ from: attacker }), "WhitelistableAccountNotWhitelisted()");
         });
       });
       describe("functional", () => {

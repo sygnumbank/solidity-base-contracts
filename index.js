@@ -1,14 +1,16 @@
 const TruffleContract = require("@truffle/contract");
 const { THREE_HUNDRED_ADDRESS, THREE_HUNDRED_NUMBERS } = require("./test/threeHundred");
 
-const operatorableJson = require("./build/contracts/Operatorable.json");
-const baseOperatorsJson = require("./build/contracts/BaseOperators.json");
-const raiseOperatorsJson = require("./build/contracts/RaiseOperators.json");
-const blockerOperatorsJson = require("./build/contracts/BlockerOperators.json");
-const traderOperatorsJson = require("./build/contracts/TraderOperators.json");
-const whitelistJson = require("./build/contracts/Whitelist.json");
-const sygnumProxyJson = require("./build/contracts/SygnumProxy.json");
-const ERC20Json = require("./build/contracts/ERC20.json");
+/* eslint-disable import/no-unresolved */
+const operatorableJson = require("./artifacts/contracts/role/base/Operatorable.sol/Operatorable.json");
+const baseOperatorsJson = require("./artifacts/contracts/role/base/BaseOperators.sol/BaseOperators.json");
+const raiseOperatorsJson = require("./artifacts/contracts/role/raise/RaiseOperators.sol/RaiseOperators.json");
+const blockerOperatorsJson = require("./artifacts/contracts/role/blocker/BlockerOperators.sol/BlockerOperators.json");
+const traderOperatorsJson = require("./artifacts/contracts/role/trader/TraderOperators.sol/TraderOperators.json");
+const whitelistJson = require("./artifacts/contracts/helpers/Whitelist.sol/Whitelist.json");
+const sygnumProxyJson = require("./artifacts/contracts/helpers/SygnumProxy.sol/SygnumProxy.json");
+const ERC20Json = require("./artifacts/contracts/helpers/ERC20/ERC20Overload/ERC20.sol/ERC20.json");
+/* eslint-enable import/no-unresolved */
 
 const MINT = 50;
 const BURN = 5;

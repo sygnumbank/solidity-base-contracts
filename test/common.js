@@ -97,6 +97,7 @@ module.exports = {
   BigNumber,
   constants,
   encodeCall,
+  ethers,
   getAdmin,
   getImplementation,
   assertRevert,

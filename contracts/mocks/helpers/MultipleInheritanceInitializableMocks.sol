@@ -1,4 +1,4 @@
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "../../helpers/Initializable.sol";
 
@@ -30,7 +30,7 @@ contract SampleHuman is Initializable {
 contract SampleMother is Initializable, SampleHuman {
     uint256 public mother;
 
-    function initialize(uint256 value) public initializer {
+    function initialize(uint256 value) public virtual initializer {
         SampleHuman.initialize();
         mother = value;
     }
@@ -42,7 +42,7 @@ contract SampleMother is Initializable, SampleHuman {
 contract SampleGramps is Initializable, SampleHuman {
     uint256 public gramps;
 
-    function initialize(uint256 value) public initializer {
+    function initialize(uint256 value) public virtual initializer {
         SampleHuman.initialize();
         gramps = value;
     }
@@ -54,7 +54,7 @@ contract SampleGramps is Initializable, SampleHuman {
 contract SampleFather is Initializable, SampleGramps {
     uint256 public father;
 
-    function initialize(uint256 _gramps, uint256 _father) public initializer {
+    function initialize(uint256 _gramps, uint256 _father) public virtual initializer {
         SampleGramps.initialize(_gramps);
         father = _father;
     }
@@ -75,5 +75,15 @@ contract SampleChild is Initializable, SampleMother, SampleFather {
         SampleMother.initialize(_mother);
         SampleFather.initialize(_gramps, _father);
         child = _child;
+    }
+
+    function initialize(uint256 _gramps, uint256 _father) public override initializer {
+        SampleGramps.initialize(_gramps);
+        father = _father;
+    }
+
+    function initialize(uint256 _mother) public virtual override(SampleGramps, SampleMother) initializer {
+        SampleHuman.initialize();
+        mother = _mother;
     }
 }

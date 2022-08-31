@@ -22,7 +22,7 @@ contract("ERC20Destroyable", ([admin, operator, user, attacker]) => {
             describe("destroy", () => {
               describe("non-functional", () => {
                 it("from attacker", async () => {
-                  await expectRevert(this.mock.destroy(user, { from: attacker }), "Operatorable: caller does not have the operator role");
+                  await expectRevert(this.mock.destroy(user, { from: attacker }), "OperatorableCallerNotOperator()");
                 });
               });
               describe("functional", () => {

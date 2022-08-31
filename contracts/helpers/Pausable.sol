@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: UNLICENSED
+
 /**
  * @title Pausable
  * @author Team 3301 <team3301@sygnum.com>
@@ -5,17 +7,28 @@
  *      mechanism that can be triggered by an authorized account in the TraderOperatorable
  *      contract.
  */
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "../role/trader/TraderOperatorable.sol";
 
-contract Pausable is TraderOperatorable {
+abstract contract Pausable is TraderOperatorable {
+    bool internal _paused;
+
+    /**
+     * @dev Error: "Pausable: paused"
+     */
+    error PausablePaused();
+
+    /**
+     * @dev Error: "Pausable: not paused"
+     */
+    error PausableNotPaused();
+
     event Paused(address indexed account);
     event Unpaused(address indexed account);
 
-    bool internal _paused;
-
-    constructor() internal {
+    // solhint-disable-next-line func-visibility
+    constructor() {
         _paused = false;
     }
 
@@ -23,7 +36,7 @@ contract Pausable is TraderOperatorable {
      * @dev Reverts if contract is paused.
      */
     modifier whenNotPaused() {
-        require(!_paused, "Pausable: paused");
+        if (_paused) revert PausablePaused();
         _;
     }
 
@@ -31,7 +44,7 @@ contract Pausable is TraderOperatorable {
      * @dev Reverts if contract is paused.
      */
     modifier whenPaused() {
-        require(_paused, "Pausable: not paused");
+        if (!_paused) revert PausableNotPaused();
         _;
     }
 
@@ -39,7 +52,7 @@ contract Pausable is TraderOperatorable {
      * @dev Called by operator to pause child contract. The contract
      *      must not already be paused.
      */
-    function pause() public onlyOperatorOrTraderOrSystem whenNotPaused {
+    function pause() public virtual onlyOperatorOrTraderOrSystem whenNotPaused {
         _paused = true;
         emit Paused(msg.sender);
     }
@@ -47,7 +60,7 @@ contract Pausable is TraderOperatorable {
     /** @dev Called by operator to pause child contract. The contract
      *       must already be paused.
      */
-    function unpause() public onlyOperatorOrTraderOrSystem whenPaused {
+    function unpause() public virtual onlyOperatorOrTraderOrSystem whenPaused {
         _paused = false;
         emit Unpaused(msg.sender);
     }
@@ -55,14 +68,14 @@ contract Pausable is TraderOperatorable {
     /**
      * @return If child contract is already paused or not.
      */
-    function isPaused() public view returns (bool) {
+    function isPaused() public view virtual returns (bool) {
         return _paused;
     }
 
     /**
      * @return If child contract is not paused.
      */
-    function isNotPaused() public view returns (bool) {
+    function isNotPaused() public view virtual returns (bool) {
         return !_paused;
     }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable */
 const BaseOperators = artifacts.require("BaseOperators");
 const BlockerOperators = artifacts.require("BlockerOperators");
 const RaiseOperators = artifacts.require("RaiseOperators");

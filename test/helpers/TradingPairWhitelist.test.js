@@ -33,25 +33,28 @@ contract("TradingPairWhitelist", ([admin, operator, system, trader, buyToken, se
         context("pair tokens", () => {
           describe("non-functional", () => {
             it("revert when attacker", async () => {
-              await expectRevert(
-                this.mock.pairTokens(identifier, buyToken, sellToken, { from: attacker }),
-                "Operatorable: caller does not have the operator role"
-              );
+              await expectRevert(this.mock.pairTokens(identifier, buyToken, sellToken, { from: attacker }), "OperatorableCallerNotOperator()");
             });
             it("revert when buy token empty", async () => {
-              await expectRevert(this.mock.pairTokens(identifier, ZERO_ADDRESS, sellToken, { from: operator }), "TradingPairWhitelist: tokens cannot be empty");
+              await expectRevert(
+                this.mock.pairTokens(identifier, ZERO_ADDRESS, sellToken, { from: operator }),
+                `TradingPairWhitelistTokensEmpty("${ZERO_ADDRESS}", "${sellToken}")`
+              );
             });
             it("revert when sell token empty", async () => {
-              await expectRevert(this.mock.pairTokens(identifier, buyToken, ZERO_ADDRESS, { from: operator }), "TradingPairWhitelist: tokens cannot be empty");
+              await expectRevert(
+                this.mock.pairTokens(identifier, buyToken, ZERO_ADDRESS, { from: operator }),
+                `TradingPairWhitelistTokensEmpty("${buyToken}", "${ZERO_ADDRESS}")`
+              );
             });
             it("revert when by and sell token are the same", async () => {
               await expectRevert(
                 this.mock.pairTokens(identifier, buyToken, buyToken, { from: operator }),
-                "TradingPairWhitelist: buy and sell tokens cannot be the same"
+                `TradingPairWhitelistBuySellSameToken("${buyToken}")`
               );
             });
             it("revert onlyPaired functionality", async () => {
-              await expectRevert(this.mock.pairedAction(buyToken, sellToken, { from: operator }), "TradingPairWhitelist: pair is not whitelisted");
+              await expectRevert(this.mock.pairedAction(buyToken, sellToken, { from: operator }), "TradingPairWhitelistPairNotWhitelisted()");
             });
             describe("when already paired", () => {
               beforeEach(async () => {
@@ -60,13 +63,13 @@ contract("TradingPairWhitelist", ([admin, operator, system, trader, buyToken, se
               it("revert when paired", async () => {
                 await expectRevert(
                   this.mock.pairTokens(identifier, buyToken, sellToken, { from: operator }),
-                  "TradingPairWhitelist: tokens have already been paired"
+                  `TradingPairWhitelistTokensAlreadyPaired("${buyToken}", "${sellToken}")`
                 );
               });
               it("when identifier already used", async () => {
                 await expectRevert(
                   this.mock.pairTokens(identifier, THREE_HUNDRED_ADDRESS[0], THREE_HUNDRED_ADDRESS[1], { from: operator }),
-                  "TradingPairWhitelist: pair ID exists"
+                  `TradingPairWhitelistPairIDExists("${web3.utils.padRight(web3.utils.toHex(identifier), 64)}")`
                 );
               });
             });
@@ -89,14 +92,14 @@ contract("TradingPairWhitelist", ([admin, operator, system, trader, buyToken, se
             describe("freeze pair", () => {
               describe("non-functional", () => {
                 it("revert from attacker", async () => {
-                  await expectRevert(this.mock.freezePair(identifier, { from: attacker }), "TraderOperatorable: caller is not trader or operator or system");
+                  await expectRevert(this.mock.freezePair(identifier, { from: attacker }), "TraderOperatorableCallerNotTraderOrOperatorOrSystem()");
                 });
                 describe("when already frozen", () => {
                   beforeEach(async () => {
                     await this.mock.freezePair(identifier, { from: operator });
                   });
                   it("revert when frozen", async () => {
-                    await expectRevert(this.mock.freezePair(identifier, { from: operator }), "TradingPairWhitelist: token pair is frozen");
+                    await expectRevert(this.mock.freezePair(identifier, { from: operator }), `TradingPairWhitelistPairFrozen()`);
                   });
                 });
                 describe("when not paired", () => {
@@ -104,7 +107,10 @@ contract("TradingPairWhitelist", ([admin, operator, system, trader, buyToken, se
                     await this.mock.depairTokens(identifier, { from: operator });
                   });
                   it("revert when not paired", async () => {
-                    await expectRevert(this.mock.freezePair(identifier, { from: operator }), "TradingPairWhitelist: pair ID not does not exist");
+                    await expectRevert(
+                      this.mock.freezePair(identifier, { from: operator }),
+                      `TradingPairWhitelistUnknownPairID("${web3.utils.padRight(web3.utils.toHex(identifier), 64)}")`
+                    );
                   });
                 });
               });
@@ -139,14 +145,17 @@ contract("TradingPairWhitelist", ([admin, operator, system, trader, buyToken, se
                   });
                   describe("non-functional", () => {
                     it("revert whenNotFrozen functionality", async () => {
-                      await expectRevert(this.mock.whenNotFrozenAction(buyToken, sellToken, { from: operator }), "TradingPairWhitelist: pair is frozen");
+                      await expectRevert(this.mock.whenNotFrozenAction(buyToken, sellToken, { from: operator }), `TradingPairWhitelistPairFrozen()`);
                     });
                     describe("when not paired", () => {
                       beforeEach(async () => {
                         await this.mock.depairTokens(identifier, { from: operator });
                       });
                       it("revert when not paired", async () => {
-                        await expectRevert(this.mock.unfreezePair(identifier, { from: operator }), "TradingPairWhitelist: pair ID not does not exist");
+                        await expectRevert(
+                          this.mock.unfreezePair(identifier, { from: operator }),
+                          `TradingPairWhitelistUnknownPairID("${web3.utils.padRight(web3.utils.toHex(identifier), 64)}")`
+                        );
                       });
                     });
                     describe("when already un-frozen", () => {
@@ -154,7 +163,7 @@ contract("TradingPairWhitelist", ([admin, operator, system, trader, buyToken, se
                         await this.mock.unfreezePair(identifier, { from: operator });
                       });
                       it("revert when frozen", async () => {
-                        await expectRevert(this.mock.unfreezePair(identifier, { from: operator }), "TradingPairWhitelist: token pair is not frozen");
+                        await expectRevert(this.mock.unfreezePair(identifier, { from: operator }), `TradingPairWhitelistPairNotFrozen()`);
                       });
                     });
                   });
@@ -198,14 +207,17 @@ contract("TradingPairWhitelist", ([admin, operator, system, trader, buyToken, se
             describe("depair", () => {
               describe("non-functional", () => {
                 it("revert from attacker", async () => {
-                  await expectRevert(this.mock.depairTokens(identifier, { from: attacker }), "Operatorable: caller does not have the operator role");
+                  await expectRevert(this.mock.depairTokens(identifier, { from: attacker }), "OperatorableCallerNotOperator()");
                 });
                 describe("when not paired", () => {
                   beforeEach(async () => {
                     await this.mock.depairTokens(identifier, { from: operator });
                   });
                   it("revert when not paired", async () => {
-                    await expectRevert(this.mock.depairTokens(identifier, { from: operator }), "TradingPairWhitelist: pair ID not does not exist");
+                    await expectRevert(
+                      this.mock.depairTokens(identifier, { from: operator }),
+                      `TradingPairWhitelistUnknownPairID("${web3.utils.padRight(web3.utils.toHex(identifier), 64)}")`
+                    );
                   });
                 });
               });
@@ -229,19 +241,19 @@ contract("TradingPairWhitelist", ([admin, operator, system, trader, buyToken, se
                   it("revert when from attacker", async () => {
                     await expectRevert(
                       this.mock.batchPairTokens(TWO_IDENTIFIER, this.buyBatch, this.sellBatch, { from: attacker }),
-                      "Operatorable: caller does not have the operator role"
+                      "OperatorableCallerNotOperator()"
                     );
                   });
                   it("revert when batch greater than 256", async () => {
                     await expectRevert(
                       this.mock.batchPairTokens(THREE_HUNDRED_ADDRESS, THREE_HUNDRED_ADDRESS, THREE_HUNDRED_ADDRESS, { from: operator }),
-                      "TradingPairWhitelist: batch count is greater than 256"
+                      `TradingPairWhitelistBatchCountTooLarge(${THREE_HUNDRED_ADDRESS.length})`
                     );
                   });
                   it("revert length not equal", async () => {
                     await expectRevert(
                       this.mock.batchPairTokens(TWO_IDENTIFIER, this.batchLonger, TWO_ADDRESSES, { from: operator }),
-                      "TradingPairWhitelist: array lengths not equal"
+                      "TradingPairWhitelistArrayLengthsNotEqual()"
                     );
                   });
                 });
@@ -264,15 +276,12 @@ contract("TradingPairWhitelist", ([admin, operator, system, trader, buyToken, se
                   describe("depair", () => {
                     describe("non-functional", () => {
                       it("revert when from attacker", async () => {
-                        await expectRevert(
-                          this.mock.batchDepairTokens(TWO_IDENTIFIER, { from: attacker }),
-                          "Operatorable: caller does not have the operator role"
-                        );
+                        await expectRevert(this.mock.batchDepairTokens(TWO_IDENTIFIER, { from: attacker }), "OperatorableCallerNotOperator()");
                       });
                       it("revert when batch greater than 256", async () => {
                         await expectRevert(
                           this.mock.batchDepairTokens(THREE_HUNDRED_ADDRESS, { from: operator }),
-                          "TradingPairWhitelist: batch count is greater than 256"
+                          `TradingPairWhitelistBatchCountTooLarge(${THREE_HUNDRED_ADDRESS.length})`
                         );
                       });
                     });
@@ -293,13 +302,13 @@ contract("TradingPairWhitelist", ([admin, operator, system, trader, buyToken, se
                       it("revert when from attacker", async () => {
                         await expectRevert(
                           this.mock.batchFreezeTokens(TWO_IDENTIFIER, { from: attacker }),
-                          "TraderOperatorable: caller is not trader or operator or system"
+                          "TraderOperatorableCallerNotTraderOrOperatorOrSystem()"
                         );
                       });
                       it("revert when batch greater than 256", async () => {
                         await expectRevert(
                           this.mock.batchFreezeTokens(THREE_HUNDRED_ADDRESS, { from: operator }),
-                          "TradingPairWhitelist: batch count is greater than 256"
+                          `TradingPairWhitelistBatchCountTooLarge(${THREE_HUNDRED_ADDRESS.length})`
                         );
                       });
                     });
@@ -318,13 +327,13 @@ contract("TradingPairWhitelist", ([admin, operator, system, trader, buyToken, se
                           it("revert when from attacker", async () => {
                             await expectRevert(
                               this.mock.batchUnfreezeTokens(TWO_IDENTIFIER, { from: attacker }),
-                              "TraderOperatorable: caller is not trader or operator or system"
+                              "TraderOperatorableCallerNotTraderOrOperatorOrSystem()"
                             );
                           });
                           it("revert when batch greater than 256", async () => {
                             await expectRevert(
                               this.mock.batchUnfreezeTokens(THREE_HUNDRED_ADDRESS, { from: operator }),
-                              "TradingPairWhitelist: batch count is greater than 256"
+                              `TradingPairWhitelistBatchCountTooLarge(${THREE_HUNDRED_ADDRESS.length})`
                             );
                           });
                         });

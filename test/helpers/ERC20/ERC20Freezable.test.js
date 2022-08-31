@@ -33,10 +33,10 @@ contract("ERC20Freezable", ([admin, operator, user, anotherUser, frozenSender, f
             });
             describe("transfer", () => {
               it("revert frozen sender", async () => {
-                await expectRevert(this.mock.transfer(user, TRANSFER, { from: frozenSender }), "Freezable: account is frozen");
+                await expectRevert(this.mock.transfer(user, TRANSFER, { from: frozenSender }), "FreezableAccountFrozen()");
               });
               it("revert frozen receiver", async () => {
-                await expectRevert(this.mock.transfer(frozenReceiver, TRANSFER, { from: user }), "Freezable: account is frozen");
+                await expectRevert(this.mock.transfer(frozenReceiver, TRANSFER, { from: user }), "FreezableAccountFrozen()");
               });
               describe("from non-frozen to non-frozen", async () => {
                 beforeEach(async () => {
@@ -52,10 +52,10 @@ contract("ERC20Freezable", ([admin, operator, user, anotherUser, frozenSender, f
             });
             describe("approve", () => {
               it("revert frozen sender", async () => {
-                await expectRevert(this.mock.approve(user, TRANSFER, { from: frozenSender }), "Freezable: account is frozen");
+                await expectRevert(this.mock.approve(user, TRANSFER, { from: frozenSender }), "FreezableAccountFrozen()");
               });
               it("revert frozen receiver", async () => {
-                await expectRevert(this.mock.approve(frozenReceiver, TRANSFER, { from: user }), "Freezable: account is frozen");
+                await expectRevert(this.mock.approve(frozenReceiver, TRANSFER, { from: user }), "FreezableAccountFrozen()");
               });
               describe("from non-frozen to non-frozen", async () => {
                 beforeEach(async () => {
@@ -66,13 +66,13 @@ contract("ERC20Freezable", ([admin, operator, user, anotherUser, frozenSender, f
                 });
                 describe("transferFrom", () => {
                   it("revert frozen sender", async () => {
-                    await expectRevert(this.mock.transferFrom(user, anotherUser, TRANSFER, { from: frozenSender }), "Freezable: account is frozen");
+                    await expectRevert(this.mock.transferFrom(user, anotherUser, TRANSFER, { from: frozenSender }), "FreezableAccountFrozen()");
                   });
                   it("revert frozen owner", async () => {
-                    await expectRevert(this.mock.transferFrom(frozenReceiver, anotherUser, TRANSFER, { from: user }), "Freezable: account is frozen");
+                    await expectRevert(this.mock.transferFrom(frozenReceiver, anotherUser, TRANSFER, { from: user }), "FreezableAccountFrozen()");
                   });
                   it("revert frozen receiver", async () => {
-                    await expectRevert(this.mock.transferFrom(anotherUser, frozenReceiver, TRANSFER, { from: user }), "Freezable: account is frozen");
+                    await expectRevert(this.mock.transferFrom(anotherUser, frozenReceiver, TRANSFER, { from: user }), "FreezableAccountFrozen()");
                   });
                   describe("from non-frozen to non-frozen", async () => {
                     beforeEach(async () => {
@@ -89,10 +89,10 @@ contract("ERC20Freezable", ([admin, operator, user, anotherUser, frozenSender, f
               });
               describe("increaseAllowance", () => {
                 it("revert frozen sender", async () => {
-                  await expectRevert(this.mock.increaseAllowance(user, TRANSFER, { from: frozenSender }), "Freezable: account is frozen");
+                  await expectRevert(this.mock.increaseAllowance(user, TRANSFER, { from: frozenSender }), "FreezableAccountFrozen()");
                 });
                 it("revert frozen receiver", async () => {
-                  await expectRevert(this.mock.increaseAllowance(frozenReceiver, TRANSFER, { from: user }), "Freezable: account is frozen");
+                  await expectRevert(this.mock.increaseAllowance(frozenReceiver, TRANSFER, { from: user }), "FreezableAccountFrozen()");
                 });
                 describe("from non-frozen to non-frozen", async () => {
                   beforeEach(async () => {
@@ -103,10 +103,10 @@ contract("ERC20Freezable", ([admin, operator, user, anotherUser, frozenSender, f
                   });
                   describe("decreaseAllowance", () => {
                     it("revert frozen sender", async () => {
-                      await expectRevert(this.mock.decreaseAllowance(user, TRANSFER, { from: frozenSender }), "Freezable: account is frozen");
+                      await expectRevert(this.mock.decreaseAllowance(user, TRANSFER, { from: frozenSender }), "FreezableAccountFrozen()");
                     });
                     it("revert frozen receiver", async () => {
-                      await expectRevert(this.mock.decreaseAllowance(frozenReceiver, TRANSFER, { from: user }), "Freezable: account is frozen");
+                      await expectRevert(this.mock.decreaseAllowance(frozenReceiver, TRANSFER, { from: user }), "FreezableAccountFrozen()");
                     });
                     describe("from non-frozen to non-frozen", async () => {
                       beforeEach(async () => {
@@ -119,10 +119,10 @@ contract("ERC20Freezable", ([admin, operator, user, anotherUser, frozenSender, f
                   });
                   describe("burnFrom", () => {
                     it("revert frozen sender", async () => {
-                      await expectRevert(this.mock.burnFrom(user, TRANSFER, { from: frozenSender }), "Freezable: account is frozen");
+                      await expectRevert(this.mock.burnFrom(user, TRANSFER, { from: frozenSender }), "FreezableAccountFrozen()");
                     });
                     it("revert frozen owner", async () => {
-                      await expectRevert(this.mock.burnFrom(frozenReceiver, TRANSFER, { from: user }), "Freezable: account is frozen");
+                      await expectRevert(this.mock.burnFrom(frozenReceiver, TRANSFER, { from: user }), "FreezableAccountFrozen()");
                     });
                     describe("from non-frozen to non-frozen", async () => {
                       beforeEach(async () => {

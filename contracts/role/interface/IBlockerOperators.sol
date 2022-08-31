@@ -3,12 +3,12 @@
  * @notice Interface for BlockerOperators contract
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
-contract IBlockerOperators {
-    function isBlocker(address _account) external view returns (bool);
+abstract contract IBlockerOperators {
+    function isBlocker(address _account) external view virtual returns (bool);
 
-    function addBlocker(address _account) external;
+    function addBlocker(address _account) external virtual;
 
-    function removeBlocker(address _account) external;
+    function removeBlocker(address _account) external virtual;
 }

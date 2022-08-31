@@ -1,10 +1,12 @@
+// SPDX-License-Identifier: UNLICENSED
+
 /**
  * @title ERC20Pausable
  * @author Team 3301 <team3301@sygnum.com>
  * @dev Overloading ERC20 functions to ensure that the contract has not been paused.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "./ERC20Overload/ERC20.sol";
 import "../Pausable.sol";
@@ -15,7 +17,7 @@ contract ERC20Pausable is ERC20, Pausable {
      * @param to address that recieves the funds.
      * @param value amount of funds.
      */
-    function transfer(address to, uint256 value) public whenNotPaused returns (bool) {
+    function transfer(address to, uint256 value) public virtual override whenNotPaused returns (bool) {
         return super.transfer(to, value);
     }
 
@@ -24,7 +26,7 @@ contract ERC20Pausable is ERC20, Pausable {
      * @param spender address that can spend the funds.
      * @param value amount of funds.
      */
-    function approve(address spender, uint256 value) public whenNotPaused returns (bool) {
+    function approve(address spender, uint256 value) public virtual override whenNotPaused returns (bool) {
         return super.approve(spender, value);
     }
 
@@ -38,7 +40,7 @@ contract ERC20Pausable is ERC20, Pausable {
         address from,
         address to,
         uint256 value
-    ) public whenNotPaused returns (bool) {
+    ) public virtual override whenNotPaused returns (bool) {
         return super.transferFrom(from, to, value);
     }
 
@@ -47,7 +49,13 @@ contract ERC20Pausable is ERC20, Pausable {
      * @param spender address that will be allowed to transfer funds.
      * @param addedValue amount of funds to added to current allowance.
      */
-    function increaseAllowance(address spender, uint256 addedValue) public whenNotPaused returns (bool) {
+    function increaseAllowance(address spender, uint256 addedValue)
+        public
+        virtual
+        override
+        whenNotPaused
+        returns (bool)
+    {
         return super.increaseAllowance(spender, addedValue);
     }
 
@@ -56,7 +64,13 @@ contract ERC20Pausable is ERC20, Pausable {
      * @param spender address that will be allowed to transfer funds.
      * @param subtractedValue amount of funds to be deducted to current allowance.
      */
-    function decreaseAllowance(address spender, uint256 subtractedValue) public whenNotPaused returns (bool) {
+    function decreaseAllowance(address spender, uint256 subtractedValue)
+        public
+        virtual
+        override
+        whenNotPaused
+        returns (bool)
+    {
         return super.decreaseAllowance(spender, subtractedValue);
     }
 
@@ -65,7 +79,7 @@ contract ERC20Pausable is ERC20, Pausable {
      * @param account address that funds will be burned from.
      * @param value amount of funds that will be burned.
      */
-    function _burn(address account, uint256 value) internal whenNotPaused {
+    function _burn(address account, uint256 value) internal virtual override whenNotPaused {
         super._burn(account, value);
     }
 
@@ -74,7 +88,7 @@ contract ERC20Pausable is ERC20, Pausable {
      * @param account address that funds will be burned from allowance.
      * @param amount amount of funds that will be burned.
      */
-    function _burnFrom(address account, uint256 amount) internal whenNotPaused {
+    function _burnFrom(address account, uint256 amount) internal virtual override whenNotPaused {
         super._burnFrom(account, amount);
     }
 
@@ -83,7 +97,7 @@ contract ERC20Pausable is ERC20, Pausable {
      * @param account address that funds will be minted to.
      * @param amount amount of funds that will be minted.
      */
-    function _mint(address account, uint256 amount) internal whenNotPaused {
+    function _mint(address account, uint256 amount) internal virtual override whenNotPaused {
         super._mint(account, amount);
     }
 }

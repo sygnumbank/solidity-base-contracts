@@ -1,10 +1,12 @@
+// SPDX-License-Identifier: UNLICENSED
+
 /**
  * @title ERC20Confiscatable
  * @author Team 3301 <team3301@sygnum.com>
  * @dev For confiscating funds from particular user addresses.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "./ERC20Snapshot.sol";
 import "../../role/base/Operatorable.sol";
@@ -20,7 +22,7 @@ contract ERC20Confiscatable is ERC20Snapshot, Operatorable {
         address _confiscatee,
         address _receiver,
         uint256 _amount
-    ) internal {
+    ) internal virtual override {
         super._confiscate(_confiscatee, _receiver, _amount);
     }
 }

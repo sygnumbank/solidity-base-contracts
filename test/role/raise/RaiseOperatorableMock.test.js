@@ -20,7 +20,7 @@ contract("RaiseOperatorableMock", ([admin, operator, investor, issuer, attacker]
     describe("investor action", () => {
       describe("non-functional", () => {
         it("reverts when not investor", async () => {
-          await expectRevert(this.mock.investorAction({ from: attacker }), "RaiseOperatorable: caller is not investor");
+          await expectRevert(this.mock.investorAction({ from: attacker }), "RaiseOperatorableCallerNotInvestor()");
         });
       });
       describe("functional", () => {
@@ -37,7 +37,7 @@ contract("RaiseOperatorableMock", ([admin, operator, investor, issuer, attacker]
     describe("issuer action", () => {
       describe("non-functional", () => {
         it("reverts when not issuer", async () => {
-          await expectRevert(this.mock.issuerAction({ from: attacker }), "RaiseOperatorable: caller is not issuer");
+          await expectRevert(this.mock.issuerAction({ from: attacker }), "RaiseOperatorableCallerNotIssuer()");
         });
       });
       describe("functional", () => {
