@@ -12,13 +12,10 @@ contract("RaiseOperators", ([admin, operator, investor, issuer, relay, attacker]
 
   context("initialization", () => {
     it("revert raiseOperators initialization with zero address", async () => {
-      await expectRevert(this.raiseOperators.initialize(ZERO_ADDRESS), "Operatorable: address of new operators contract cannot be zero");
+      await expectRevert(this.raiseOperators.initialize(ZERO_ADDRESS), "OperatorableNewOperatorsZeroAddress()");
     });
     it("revert RaiseOperatorable initialization with zero address", async () => {
-      await expectRevert(
-        this.raiseOperatorable.initialize(this.baseOperators.address, ZERO_ADDRESS),
-        "RaiseOperatorable: address of new raiseOperators contract can not be zero"
-      );
+      await expectRevert(this.raiseOperatorable.initialize(this.baseOperators.address, ZERO_ADDRESS), "RaiseOperatorableNewRaiseOperatorsAddressZero()");
     });
   });
 
@@ -37,7 +34,7 @@ contract("RaiseOperators", ([admin, operator, investor, issuer, relay, attacker]
         assert.equal(await this.raiseOperatorable.isInitialized(), true);
       });
       it("can not be initialized twice", async () => {
-        await expectRevert(this.raiseOperatorable.initialize(this.raiseOperators.address), "Initializable: Contract instance has already been initialized");
+        await expectRevert(this.raiseOperatorable.initialize(this.raiseOperators.address), "InitializableContractAlreadyInitialized()");
       });
     });
   });
@@ -52,31 +49,25 @@ contract("RaiseOperators", ([admin, operator, investor, issuer, relay, attacker]
       describe("non-functional", () => {
         describe("from operator", () => {
           it("revert removing non-existing investor", async () => {
-            await expectRevert(this.raiseOperators.removeInvestor(investor, { from: operator }), "Roles: account does not have role");
+            await expectRevert(this.raiseOperators.removeInvestor(investor, { from: operator }), `RolesAccountDoesNotHaveRole("${investor}")`);
           });
           it("revert removing investor with zero addr", async () => {
-            await expectRevert(this.raiseOperators.removeInvestor(ZERO_ADDRESS, { from: operator }), "Roles: account is the zero address");
+            await expectRevert(this.raiseOperators.removeInvestor(ZERO_ADDRESS, { from: operator }), "RolesAccountIsZeroAddress()");
           });
           it("revert adding investor with zero addr", async () => {
-            await expectRevert(this.raiseOperators.addInvestor(ZERO_ADDRESS, { from: operator }), "Roles: account is the zero address");
+            await expectRevert(this.raiseOperators.addInvestor(ZERO_ADDRESS, { from: operator }), "RolesAccountIsZeroAddress()");
           });
         });
         describe("from attacker", () => {
           it("revert add investor", async () => {
-            await expectRevert(
-              this.raiseOperators.addInvestor(ZERO_ADDRESS, { from: attacker }),
-              "Operatorable: caller does not have the operator role nor relay"
-            );
+            await expectRevert(this.raiseOperators.addInvestor(ZERO_ADDRESS, { from: attacker }), "OperatorableCallerNotOperatorOrRelay()");
           });
           describe("removal of investor", () => {
             beforeEach(async () => {
               await this.raiseOperators.addInvestor(investor, { from: operator });
             });
             it("revert remove investor", async () => {
-              await expectRevert(
-                this.raiseOperators.removeInvestor(ZERO_ADDRESS, { from: attacker }),
-                "Operatorable: caller does not have the operator role nor relay"
-              );
+              await expectRevert(this.raiseOperators.removeInvestor(ZERO_ADDRESS, { from: attacker }), "OperatorableCallerNotOperatorOrRelay()");
             });
           });
         });
@@ -123,18 +114,18 @@ contract("RaiseOperators", ([admin, operator, investor, issuer, relay, attacker]
         describe("non-functional", () => {
           describe("from operator", () => {
             it("revert removing non-existing issuer", async () => {
-              await expectRevert(this.raiseOperators.removeIssuer(issuer, { from: operator }), "Roles: account does not have role");
+              await expectRevert(this.raiseOperators.removeIssuer(issuer, { from: operator }), `RolesAccountDoesNotHaveRole("${issuer}")`);
             });
             it("revert removing issuer with zero addr", async () => {
-              await expectRevert(this.raiseOperators.removeIssuer(ZERO_ADDRESS, { from: operator }), "Roles: account is the zero address");
+              await expectRevert(this.raiseOperators.removeIssuer(ZERO_ADDRESS, { from: operator }), "RolesAccountIsZeroAddress()");
             });
             it("revert adding issuer with zero addr", async () => {
-              await expectRevert(this.raiseOperators.addIssuer(ZERO_ADDRESS, { from: operator }), "Roles: account is the zero address");
+              await expectRevert(this.raiseOperators.addIssuer(ZERO_ADDRESS, { from: operator }), "RolesAccountIsZeroAddress()");
             });
           });
           describe("from attacker", () => {
             it("revert add issuer", async () => {
-              await expectRevert(this.raiseOperators.removeIssuer(issuer, { from: attacker }), "Operatorable: caller does not have the operator role");
+              await expectRevert(this.raiseOperators.removeIssuer(issuer, { from: attacker }), "OperatorableCallerNotOperator()");
             });
 
             describe("removal of issuer", () => {
@@ -142,7 +133,7 @@ contract("RaiseOperators", ([admin, operator, investor, issuer, relay, attacker]
                 await this.raiseOperators.addIssuer(issuer, { from: operator });
               });
               it("revert remove issuer", async () => {
-                await expectRevert(this.raiseOperators.removeIssuer(ZERO_ADDRESS, { from: attacker }), "Operatorable: caller does not have the operator role");
+                await expectRevert(this.raiseOperators.removeIssuer(ZERO_ADDRESS, { from: attacker }), "OperatorableCallerNotOperator()");
               });
             });
           });

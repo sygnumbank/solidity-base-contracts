@@ -1,0 +1,47 @@
+include:
+  - project: "sygnum/infra/templates"
+    ref: "v4.11.0"
+    file: "/gitlab/.ethereum-contracts-ci-template.yml"
+
+stages:
+  - solidity-build
+  - solidity-tests
+  - npm-publish
+  - deploy-to-goerli
+  - deploy-to-mainnet
+
+solidity-build:
+  extends: .solidity-build
+
+solidity-test:
+  extends: .solidity-test
+
+solidity-coverage:
+  extends: .solidity-coverage
+
+solidity-uml:
+  extends: .solidity-uml
+
+code-lint:
+  extends: .code-lint
+
+solidity-mythril:
+  extends: .solidity-mythril
+
+solidity-securify:
+  extends: .solidity-securify
+
+solidity-slither:
+  extends: .solidity-slither
+
+npm-publish:
+  extends: .npm-publish
+
+deploy-to-dev:
+  extends: .deploy-to-dev
+
+deploy-to-tst:
+  extends: .deploy-to-tst
+
+deploy-to-prd:
+  extends: .deploy-to-prd

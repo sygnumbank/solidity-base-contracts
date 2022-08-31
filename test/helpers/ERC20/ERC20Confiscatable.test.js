@@ -30,10 +30,7 @@ contract("ERC20Confiscatable", ([admin, operator, user, anotherUser, receiver, a
                 describe("non-functional", () => {
                   describe("from attacker", () => {
                     beforeEach(async () => {
-                      await expectRevert(
-                        this.mock.confiscate(user, receiver, CONFISCATE, { from: attacker }),
-                        "Operatorable: caller does not have the operator role"
-                      );
+                      await expectRevert(this.mock.confiscate(user, receiver, CONFISCATE, { from: attacker }), "OperatorableCallerNotOperator()");
                     });
                     it("balance not updated", async () => {
                       assert.equal(await this.mock.balanceOf(user), MINT);
@@ -60,7 +57,7 @@ contract("ERC20Confiscatable", ([admin, operator, user, anotherUser, receiver, a
                     beforeEach(async () => {
                       await expectRevert(
                         this.mock.batchConfiscate([user, anotherUser], [receiver, anotherReceiver], [CONFISCATE, CONFISCATE], { from: attacker }),
-                        "Operatorable: caller does not have the operator role"
+                        "OperatorableCallerNotOperator()"
                       );
                     });
                     it("balance not updated", async () => {
@@ -71,7 +68,7 @@ contract("ERC20Confiscatable", ([admin, operator, user, anotherUser, receiver, a
                     beforeEach(async () => {
                       await expectRevert(
                         this.mock.batchConfiscate([user], [receiver, anotherReceiver], [CONFISCATE, CONFISCATE], { from: attacker }),
-                        "ERC20ConfiscatableMock: confiscatees, recipients and values are not equal"
+                        "ERC20ConfiscatableMockLengthsNotEqual()"
                       );
                     });
                     it("balance not updated", async () => {
@@ -82,7 +79,7 @@ contract("ERC20Confiscatable", ([admin, operator, user, anotherUser, receiver, a
                     beforeEach(async () => {
                       await expectRevert(
                         this.mock.batchConfiscate([user, anotherUser], [receiver], [CONFISCATE, CONFISCATE], { from: attacker }),
-                        "ERC20ConfiscatableMock: confiscatees, recipients and values are not equal"
+                        "ERC20ConfiscatableMockLengthsNotEqual()"
                       );
                     });
                     it("balance not updated", async () => {
@@ -104,7 +101,7 @@ contract("ERC20Confiscatable", ([admin, operator, user, anotherUser, receiver, a
                     beforeEach(async () => {
                       await expectRevert(
                         this.mock.batchConfiscate(THREE_HUNDRED_ADDRESS, THREE_HUNDRED_ADDRESS, THREE_HUNDRED_NUMBERS, { from: operator }),
-                        "ERC20ConfiscatableMock: batch count is greater than BATCH_LIMIT."
+                        `ERC20ConfiscatableMockBatchCountTooLarge(${THREE_HUNDRED_ADDRESS.length})`
                       );
                     });
                     it("balance not updated", async () => {

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: UNLICENSED
+
 /**
  * @title ERC20Whitelist
  * @author Team 3301 <team3301@sygnum.com>
@@ -5,7 +7,7 @@
  * actions are whitelisted.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "./ERC20Overload/ERC20.sol";
 import "../instance/Whitelistable.sol";
@@ -16,7 +18,14 @@ contract ERC20Whitelist is ERC20, Whitelistable {
      * @param to address that recieves the funds.
      * @param value amount of funds.
      */
-    function transfer(address to, uint256 value) public whenWhitelisted(msg.sender) whenWhitelisted(to) returns (bool) {
+    function transfer(address to, uint256 value)
+        public
+        virtual
+        override
+        whenWhitelisted(msg.sender)
+        whenWhitelisted(to)
+        returns (bool)
+    {
         return super.transfer(to, value);
     }
 
@@ -27,6 +36,8 @@ contract ERC20Whitelist is ERC20, Whitelistable {
      */
     function approve(address spender, uint256 value)
         public
+        virtual
+        override
         whenWhitelisted(msg.sender)
         whenWhitelisted(spender)
         returns (bool)
@@ -44,7 +55,7 @@ contract ERC20Whitelist is ERC20, Whitelistable {
         address from,
         address to,
         uint256 value
-    ) public whenWhitelisted(msg.sender) whenWhitelisted(from) whenWhitelisted(to) returns (bool) {
+    ) public virtual override whenWhitelisted(msg.sender) whenWhitelisted(from) whenWhitelisted(to) returns (bool) {
         return super.transferFrom(from, to, value);
     }
 
@@ -55,6 +66,8 @@ contract ERC20Whitelist is ERC20, Whitelistable {
      */
     function increaseAllowance(address spender, uint256 addedValue)
         public
+        virtual
+        override
         whenWhitelisted(spender)
         whenWhitelisted(msg.sender)
         returns (bool)
@@ -69,6 +82,8 @@ contract ERC20Whitelist is ERC20, Whitelistable {
      */
     function decreaseAllowance(address spender, uint256 subtractedValue)
         public
+        virtual
+        override
         whenWhitelisted(spender)
         whenWhitelisted(msg.sender)
         returns (bool)
@@ -81,7 +96,7 @@ contract ERC20Whitelist is ERC20, Whitelistable {
      * @param account address that funds will be burned from.
      * @param value amount of funds that will be burned.
      */
-    function _burn(address account, uint256 value) internal whenWhitelisted(account) {
+    function _burn(address account, uint256 value) internal virtual override whenWhitelisted(account) {
         super._burn(account, value);
     }
 
@@ -90,7 +105,13 @@ contract ERC20Whitelist is ERC20, Whitelistable {
      * @param account address that funds will be burned from allowance.
      * @param amount amount of funds that will be burned.
      */
-    function _burnFrom(address account, uint256 amount) internal whenWhitelisted(msg.sender) whenWhitelisted(account) {
+    function _burnFrom(address account, uint256 amount)
+        internal
+        virtual
+        override
+        whenWhitelisted(msg.sender)
+        whenWhitelisted(account)
+    {
         super._burnFrom(account, amount);
     }
 
@@ -99,7 +120,7 @@ contract ERC20Whitelist is ERC20, Whitelistable {
      * @param account address that funds will be minted to.
      * @param amount amount of funds that will be minted.
      */
-    function _mint(address account, uint256 amount) internal whenWhitelisted(account) {
+    function _mint(address account, uint256 amount) internal virtual override whenWhitelisted(account) {
         super._mint(account, amount);
     }
 }

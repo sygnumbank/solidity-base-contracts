@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: UNLICENSED
+
 /**
  * @title TradingPairWhitelist
  * @author Team 3301 <team3301@sygnum.com>
@@ -5,7 +7,7 @@
  *       is controlled by operators in Operatorable contract which is initialized with the relevant BaseOperators address.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "../libraries/Bytes32Set.sol";
 import "../role/trader/TraderOperatorable.sol";
@@ -23,6 +25,55 @@ contract TradingPairWhitelist is TraderOperatorable {
         address buyToken;
         address sellToken;
     }
+    /**
+     * @dev Error: "TradingPairWhitelist: pair is not whitelisted"
+     */
+    error TradingPairWhitelistPairNotWhitelisted();
+
+    /**
+     * @dev Error: "TradingPairWhitelist: batch count is greater than 256"
+     */
+    error TradingPairWhitelistBatchCountTooLarge(uint256 _batchCount);
+
+    /**
+     * @dev Error: "TradingPairWhitelistArrayLengthsNotEqual()"
+     */
+    error TradingPairWhitelistArrayLengthsNotEqual();
+
+    /**
+     * @dev Error: "TradingPairWhitelist: tokens cannot be empty"
+     */
+    error TradingPairWhitelistTokensEmpty(address _token1, address _token2);
+
+    /**
+     * @dev Error: "TradingPairWhitelist: buy and sell tokens cannot be the same"
+     */
+    error TradingPairWhitelistBuySellSameToken(address _token);
+
+    /**
+     * @dev Error: "TradingPairWhitelist: tokens have already been paired"
+     */
+    error TradingPairWhitelistTokensAlreadyPaired(address _token1, address _token2);
+
+    /**
+     * @dev Error: "TradingPairWhitelist: pair ID exists"
+     */
+    error TradingPairWhitelistPairIDExists(bytes32 _pairID);
+
+    /**
+     * @dev Error: "TradingPairWhitelist: pair ID not does not exist"
+     */
+    error TradingPairWhitelistUnknownPairID(bytes32 _pairID);
+
+    /**
+     * @dev Error: "TradingPairWhitelist: token pair is frozen"
+     */
+    error TradingPairWhitelistPairFrozen();
+
+    /**
+     * @dev Error: "TradingPairWhitelist: token pair is not frozen"
+     */
+    error TradingPairWhitelistPairNotFrozen();
 
     event PairedTokens(bytes32 indexed pairID, address indexed buytoken, address indexed sellToken);
     event DepairedTokens(bytes32 indexed pairID, address indexed buytoken, address indexed sellToken);
@@ -35,7 +86,7 @@ contract TradingPairWhitelist is TraderOperatorable {
      * @param _sellToken sell token against buy token to determine if whitelisted pair or not.
      */
     modifier onlyPaired(address _buyToken, address _sellToken) {
-        require(isPaired(_buyToken, _sellToken), "TradingPairWhitelist: pair is not whitelisted");
+        if (!isPaired(_buyToken, _sellToken)) revert TradingPairWhitelistPairNotWhitelisted();
         _;
     }
 
@@ -45,7 +96,7 @@ contract TradingPairWhitelist is TraderOperatorable {
      * @param _sellToken sell token against buy token to determine if frozen pair or not.
      */
     modifier whenNotFrozen(address _buyToken, address _sellToken) {
-        require(!isFrozen(_buyToken, _sellToken), "TradingPairWhitelist: pair is frozen");
+        if (isFrozen(_buyToken, _sellToken)) revert TradingPairWhitelistPairFrozen();
         _;
     }
 
@@ -55,7 +106,7 @@ contract TradingPairWhitelist is TraderOperatorable {
      * @param _sellToken sell token against buy token to determine if whitelisted pair or not.
      * @return bool is whitelisted pair.
      */
-    function isPaired(address _buyToken, address _sellToken) public view returns (bool) {
+    function isPaired(address _buyToken, address _sellToken) public view virtual returns (bool) {
         return pair[pairIdentifier[_buyToken][_sellToken]].paired;
     }
 
@@ -65,7 +116,7 @@ contract TradingPairWhitelist is TraderOperatorable {
      * @param _sellToken sell token against buy token to determine if frozen pair or not.
      * @return bool is frozen pair.
      */
-    function isFrozen(address _buyToken, address _sellToken) public view returns (bool) {
+    function isFrozen(address _buyToken, address _sellToken) public view virtual returns (bool) {
         return pair[pairIdentifier[_buyToken][_sellToken]].frozen;
     }
 
@@ -87,7 +138,7 @@ contract TradingPairWhitelist is TraderOperatorable {
      * @dev Depair tokens to be available for trading on DEX.
      * @param _pairID pair identifier.
      */
-    function depairTokens(bytes32 _pairID) public onlyOperator {
+    function depairTokens(bytes32 _pairID) public virtual onlyOperator {
         _depairTokens(_pairID);
     }
 
@@ -95,7 +146,7 @@ contract TradingPairWhitelist is TraderOperatorable {
      * @dev Freeze pair trading on DEX.
      * @param _pairID pair identifier.
      */
-    function freezePair(bytes32 _pairID) public onlyOperatorOrTraderOrSystem {
+    function freezePair(bytes32 _pairID) public virtual onlyOperatorOrTraderOrSystem {
         _freezePair(_pairID);
     }
 
@@ -103,7 +154,7 @@ contract TradingPairWhitelist is TraderOperatorable {
      * @dev Unfreeze pair trading on DEX.
      * @param _pairID pair identifier.
      */
-    function unfreezePair(bytes32 _pairID) public onlyOperatorOrTraderOrSystem {
+    function unfreezePair(bytes32 _pairID) public virtual onlyOperatorOrTraderOrSystem {
         _unfreezePair(_pairID);
     }
 
@@ -117,14 +168,12 @@ contract TradingPairWhitelist is TraderOperatorable {
         bytes32[] memory _pairID,
         address[] memory _buyToken,
         address[] memory _sellToken
-    ) public onlyOperator {
-        require(_pairID.length <= 256, "TradingPairWhitelist: batch count is greater than 256");
-        require(
-            _pairID.length == _buyToken.length && _buyToken.length == _sellToken.length,
-            "TradingPairWhitelist: array lengths not equal"
-        );
+    ) public virtual onlyOperator {
+        if (_pairID.length > 256) revert TradingPairWhitelistBatchCountTooLarge(_pairID.length);
+        if (_pairID.length != _buyToken.length || _buyToken.length != _sellToken.length)
+            revert TradingPairWhitelistArrayLengthsNotEqual();
 
-        for (uint256 i = 0; i < _buyToken.length; i++) {
+        for (uint256 i = 0; i < _buyToken.length; ++i) {
             _pairTokens(_pairID[i], _buyToken[i], _sellToken[i]);
         }
     }
@@ -133,10 +182,10 @@ contract TradingPairWhitelist is TraderOperatorable {
      * @dev Batch depair tokens.
      * @param _pairID array of pairID.
      */
-    function batchDepairTokens(bytes32[] memory _pairID) public onlyOperator {
-        require(_pairID.length <= 256, "TradingPairWhitelist: batch count is greater than 256");
+    function batchDepairTokens(bytes32[] memory _pairID) public virtual onlyOperator {
+        if (_pairID.length > 256) revert TradingPairWhitelistBatchCountTooLarge(_pairID.length);
 
-        for (uint256 i = 0; i < _pairID.length; i++) {
+        for (uint256 i = 0; i < _pairID.length; ++i) {
             _depairTokens(_pairID[i]);
         }
     }
@@ -145,10 +194,10 @@ contract TradingPairWhitelist is TraderOperatorable {
      * @dev Batch freeze tokens.
      * @param _pairID array of pairID.
      */
-    function batchFreezeTokens(bytes32[] memory _pairID) public onlyOperatorOrTraderOrSystem {
-        require(_pairID.length <= 256, "TradingPairWhitelist: batch count is greater than 256");
+    function batchFreezeTokens(bytes32[] memory _pairID) public virtual onlyOperatorOrTraderOrSystem {
+        if (_pairID.length > 256) revert TradingPairWhitelistBatchCountTooLarge(_pairID.length);
 
-        for (uint256 i = 0; i < _pairID.length; i++) {
+        for (uint256 i = 0; i < _pairID.length; ++i) {
             _freezePair(_pairID[i]);
         }
     }
@@ -157,10 +206,10 @@ contract TradingPairWhitelist is TraderOperatorable {
      * @dev Batch unfreeze tokens.
      * @param _pairID array of pairID.
      */
-    function batchUnfreezeTokens(bytes32[] memory _pairID) public onlyOperatorOrTraderOrSystem {
-        require(_pairID.length <= 256, "TradingPairWhitelist: batch count is greater than 256");
+    function batchUnfreezeTokens(bytes32[] memory _pairID) public virtual onlyOperatorOrTraderOrSystem {
+        if (_pairID.length > 256) revert TradingPairWhitelistBatchCountTooLarge(_pairID.length);
 
-        for (uint256 i = 0; i < _pairID.length; i++) {
+        for (uint256 i = 0; i < _pairID.length; ++i) {
             _unfreezePair(_pairID[i]);
         }
     }
@@ -168,14 +217,14 @@ contract TradingPairWhitelist is TraderOperatorable {
     /**
      * @return Amount of pairs.
      */
-    function getPairCount() public view returns (uint256) {
+    function getPairCount() public view virtual returns (uint256) {
         return pairs.count();
     }
 
     /**
      * @return Key at index.
      */
-    function getIdentifier(uint256 _index) public view returns (bytes32) {
+    function getIdentifier(uint256 _index) public view virtual returns (bytes32) {
         return pairs.keyAtIndex(_index);
     }
 
@@ -184,11 +233,12 @@ contract TradingPairWhitelist is TraderOperatorable {
         bytes32 _pairID,
         address _buyToken,
         address _sellToken
-    ) internal {
-        require(_buyToken != address(0) && _sellToken != address(0), "TradingPairWhitelist: tokens cannot be empty");
-        require(_buyToken != _sellToken, "TradingPairWhitelist: buy and sell tokens cannot be the same");
-        require(!isPaired(_buyToken, _sellToken), "TradingPairWhitelist: tokens have already been paired");
-        require(!pairs.exists(_pairID), "TradingPairWhitelist: pair ID exists");
+    ) internal virtual {
+        if (_buyToken == address(0) || _sellToken == address(0))
+            revert TradingPairWhitelistTokensEmpty(_buyToken, _sellToken);
+        if (_buyToken == _sellToken) revert TradingPairWhitelistBuySellSameToken(_buyToken);
+        if (isPaired(_buyToken, _sellToken)) revert TradingPairWhitelistTokensAlreadyPaired(_buyToken, _sellToken);
+        if (pairs.exists(_pairID)) revert TradingPairWhitelistPairIDExists(_pairID);
 
         pair[_pairID] = Pair({paired: true, frozen: false, buyToken: _buyToken, sellToken: _sellToken});
 
@@ -197,8 +247,8 @@ contract TradingPairWhitelist is TraderOperatorable {
         emit PairedTokens(_pairID, _buyToken, _sellToken);
     }
 
-    function _depairTokens(bytes32 _pairID) internal {
-        require(pairs.exists(_pairID), "TradingPairWhitelist: pair ID not does not exist");
+    function _depairTokens(bytes32 _pairID) internal virtual {
+        if (!pairs.exists(_pairID)) revert TradingPairWhitelistUnknownPairID(_pairID);
 
         Pair memory p = pair[_pairID];
 
@@ -208,17 +258,17 @@ contract TradingPairWhitelist is TraderOperatorable {
         emit DepairedTokens(_pairID, p.buyToken, p.sellToken);
     }
 
-    function _freezePair(bytes32 _pairID) internal {
-        require(pairs.exists(_pairID), "TradingPairWhitelist: pair ID not does not exist");
-        require(!pair[_pairID].frozen, "TradingPairWhitelist: token pair is frozen");
+    function _freezePair(bytes32 _pairID) internal virtual {
+        if (!pairs.exists(_pairID)) revert TradingPairWhitelistUnknownPairID(_pairID);
+        if (pair[_pairID].frozen) revert TradingPairWhitelistPairFrozen();
 
         pair[_pairID].frozen = true;
         emit FrozenPair(_pairID);
     }
 
-    function _unfreezePair(bytes32 _pairID) internal {
-        require(pairs.exists(_pairID), "TradingPairWhitelist: pair ID not does not exist");
-        require(pair[_pairID].frozen, "TradingPairWhitelist: token pair is not frozen");
+    function _unfreezePair(bytes32 _pairID) internal virtual {
+        if (!pairs.exists(_pairID)) revert TradingPairWhitelistUnknownPairID(_pairID);
+        if (!pair[_pairID].frozen) revert TradingPairWhitelistPairNotFrozen();
 
         pair[_pairID].frozen = false;
         emit UnFrozenPair(_pairID);

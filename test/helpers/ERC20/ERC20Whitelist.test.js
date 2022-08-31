@@ -23,10 +23,10 @@ contract("ERC20Whitelist", ([admin, operator, whitelistedSender, whitelistReciev
           });
           describe("transfer", () => {
             it("revert non-whitelisted sender", async () => {
-              await expectRevert(this.mock.transfer(whitelistReciever, TRANSFER, { from: nonWhitelisted }), "Whitelistable: account is not whitelisted");
+              await expectRevert(this.mock.transfer(whitelistReciever, TRANSFER, { from: nonWhitelisted }), "WhitelistableAccountNotWhitelisted()");
             });
             it("revert non-whitelisted receiver", async () => {
-              await expectRevert(this.mock.transfer(nonWhitelisted, TRANSFER, { from: whitelistedSender }), "Whitelistable: account is not whitelisted");
+              await expectRevert(this.mock.transfer(nonWhitelisted, TRANSFER, { from: whitelistedSender }), "WhitelistableAccountNotWhitelisted()");
             });
             describe("from whitelisted to whitelisted", async () => {
               beforeEach(async () => {
@@ -42,13 +42,10 @@ contract("ERC20Whitelist", ([admin, operator, whitelistedSender, whitelistReciev
           });
           describe("increaseAllowance", () => {
             it("revert non-whitelisted sender", async () => {
-              await expectRevert(this.mock.increaseAllowance(whitelisted, TRANSFER, { from: nonWhitelisted }), "Whitelistable: account is not whitelisted");
+              await expectRevert(this.mock.increaseAllowance(whitelisted, TRANSFER, { from: nonWhitelisted }), "WhitelistableAccountNotWhitelisted()");
             });
             it("revert non-whitelisted receiver", async () => {
-              await expectRevert(
-                this.mock.increaseAllowance(nonWhitelisted, TRANSFER, { from: whitelistedSender }),
-                "Whitelistable: account is not whitelisted"
-              );
+              await expectRevert(this.mock.increaseAllowance(nonWhitelisted, TRANSFER, { from: whitelistedSender }), "WhitelistableAccountNotWhitelisted()");
             });
             describe("from whitelisted to whitelisted", async () => {
               beforeEach(async () => {
@@ -59,12 +56,12 @@ contract("ERC20Whitelist", ([admin, operator, whitelistedSender, whitelistReciev
               });
               describe("decreaseAllowance", () => {
                 it("revert non-whitelisted sender", async () => {
-                  await expectRevert(this.mock.decreaseAllowance(whitelisted, TRANSFER, { from: nonWhitelisted }), "Whitelistable: account is not whitelisted");
+                  await expectRevert(this.mock.decreaseAllowance(whitelisted, TRANSFER, { from: nonWhitelisted }), "WhitelistableAccountNotWhitelisted()");
                 });
                 it("revert non-whitelisted receiver", async () => {
                   await expectRevert(
                     this.mock.decreaseAllowance(nonWhitelisted, TRANSFER, { from: whitelistedSender }),
-                    "Whitelistable: account is not whitelisted"
+                    "WhitelistableAccountNotWhitelisted()"
                   );
                 });
                 describe("from whitelisted to whitelisted", async () => {
@@ -80,7 +77,7 @@ contract("ERC20Whitelist", ([admin, operator, whitelistedSender, whitelistReciev
           });
           describe("burn", () => {
             it("revert non-whitelisted burn ", async () => {
-              await expectRevert(this.mock.burn(BURN, { from: nonWhitelisted }), "Whitelistable: account is not whitelisted");
+              await expectRevert(this.mock.burn(BURN, { from: nonWhitelisted }), "WhitelistableAccountNotWhitelisted()");
             });
             describe("from from whitelisted", () => {
               beforeEach(async () => {
@@ -93,7 +90,7 @@ contract("ERC20Whitelist", ([admin, operator, whitelistedSender, whitelistReciev
           });
           describe("MINT", () => {
             it("revert non-whitelisted MINT ", async () => {
-              await expectRevert(this.mock.mint(nonWhitelisted, MINT), "Whitelistable: account is not whitelisted");
+              await expectRevert(this.mock.mint(nonWhitelisted, MINT), "WhitelistableAccountNotWhitelisted()");
             });
             describe("from from whitelisted", () => {
               beforeEach(async () => {
@@ -106,10 +103,10 @@ contract("ERC20Whitelist", ([admin, operator, whitelistedSender, whitelistReciev
           });
           describe("approve", () => {
             it("revert non-whitelisted sender", async () => {
-              await expectRevert(this.mock.approve(whitelisted, TRANSFER, { from: nonWhitelisted }), "Whitelistable: account is not whitelisted");
+              await expectRevert(this.mock.approve(whitelisted, TRANSFER, { from: nonWhitelisted }), "WhitelistableAccountNotWhitelisted()");
             });
             it("revert non-whitelisted receiver", async () => {
-              await expectRevert(this.mock.approve(nonWhitelisted, TRANSFER, { from: whitelistedSender }), "Whitelistable: account is not whitelisted");
+              await expectRevert(this.mock.approve(nonWhitelisted, TRANSFER, { from: whitelistedSender }), "WhitelistableAccountNotWhitelisted()");
             });
             describe("from whitelisted to whitelisted", async () => {
               beforeEach(async () => {
@@ -122,19 +119,19 @@ contract("ERC20Whitelist", ([admin, operator, whitelistedSender, whitelistReciev
                 it("revert non-whitelisted sender", async () => {
                   await expectRevert(
                     this.mock.transferFrom(whitelistedSender, whitelistReciever, TRANSFER, { from: nonWhitelisted }),
-                    "Whitelistable: account is not whitelisted"
+                    "WhitelistableAccountNotWhitelisted()"
                   );
                 });
                 it("revert non-whitelisted owner", async () => {
                   await expectRevert(
                     this.mock.transferFrom(nonWhitelisted, whitelistReciever, TRANSFER, { from: whitelistedSender }),
-                    "Whitelistable: account is not whitelisted"
+                    "WhitelistableAccountNotWhitelisted()"
                   );
                 });
                 it("revert non-whitelisted receiver", async () => {
                   await expectRevert(
                     this.mock.transferFrom(whitelistReciever, nonWhitelisted, TRANSFER, { from: whitelistedSender }),
-                    "Whitelistable: account is not whitelisted"
+                    "WhitelistableAccountNotWhitelisted()"
                   );
                 });
                 describe("from whitelisted to whitelisted with whitelisted", async () => {
@@ -148,10 +145,10 @@ contract("ERC20Whitelist", ([admin, operator, whitelistedSender, whitelistReciev
               });
               describe("burnFrom", () => {
                 it("revert non-whitelisted sender", async () => {
-                  await expectRevert(this.mock.burnFrom(whitelistedSender, BURN, { from: nonWhitelisted }), "Whitelistable: account is not whitelisted");
+                  await expectRevert(this.mock.burnFrom(whitelistedSender, BURN, { from: nonWhitelisted }), "WhitelistableAccountNotWhitelisted()");
                 });
                 it("revert non-whitelisted owner", async () => {
-                  await expectRevert(this.mock.burnFrom(nonWhitelisted, BURN, { from: whitelistedSender }), "Whitelistable: account is not whitelisted");
+                  await expectRevert(this.mock.burnFrom(nonWhitelisted, BURN, { from: whitelistedSender }), "WhitelistableAccountNotWhitelisted()");
                 });
                 describe("from whitelisted to whitelisted with whitelisted", async () => {
                   beforeEach(async () => {

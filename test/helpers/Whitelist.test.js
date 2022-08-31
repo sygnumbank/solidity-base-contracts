@@ -20,17 +20,14 @@ contract("Whitelist", ([admin, operator, system, relay, user, attacker]) => {
         context("when un-whitelisted", () => {
           describe("non-functional", () => {
             it("revert whitelisted action when unwhitelisted", async () => {
-              await expectRevert(this.mock.whitelistedAction({ from: user }), "Whitelist: account is not whitelisted");
+              await expectRevert(this.mock.whitelistedAction({ from: user }), `WhitelistAccountNotWhitelisted("${user}")`);
             });
             describe("whitelisting", () => {
               it("reverts when whitelisting from attacker", async () => {
-                await expectRevert(
-                  this.mock.toggleWhitelist(user, true, { from: attacker }),
-                  "Operatorable: caller does not have the operator role nor system nor relay"
-                );
+                await expectRevert(this.mock.toggleWhitelist(user, true, { from: attacker }), "OperatorableCallerNotOperatorOrSystemOrRelay()");
               });
               it("revert empty address", async () => {
-                await expectRevert(this.mock.toggleWhitelist(ZERO_ADDRESS, true, { from: operator }), "Whitelist: invalid address");
+                await expectRevert(this.mock.toggleWhitelist(ZERO_ADDRESS, true, { from: operator }), "WhitelistInvalidAddress()");
               });
             });
           });
@@ -61,10 +58,7 @@ contract("Whitelist", ([admin, operator, system, relay, user, attacker]) => {
               context("when whitelisted", () => {
                 describe("non-functional", () => {
                   it("revert unwhitelisting from attacker", async () => {
-                    await expectRevert(
-                      this.mock.toggleWhitelist(user, false, { from: attacker }),
-                      "Operatorable: caller does not have the operator role nor system nor relay"
-                    );
+                    await expectRevert(this.mock.toggleWhitelist(user, false, { from: attacker }), "OperatorableCallerNotOperatorOrSystemOrRelay()");
                   });
                 });
                 describe("functional", () => {
@@ -86,13 +80,13 @@ contract("Whitelist", ([admin, operator, system, relay, user, attacker]) => {
         describe("whitelist", () => {
           describe("non-functional", () => {
             it("reverts when batch greater than 256", async () => {
-              await expectRevert(this.mock.batchToggleWhitelist(THREE_HUNDRED_ADDRESS, true, { from: operator }), "Whitelist: batch count is greater than 256");
+              await expectRevert(
+                this.mock.batchToggleWhitelist(THREE_HUNDRED_ADDRESS, true, { from: operator }),
+                `WhitelistBatchCountTooLarge(${THREE_HUNDRED_ADDRESS.length})`
+              );
             });
             it("reverts when from attacker", async () => {
-              await expectRevert(
-                this.mock.batchToggleWhitelist(TWO_ADDRESSES, true, { from: attacker }),
-                "Operatorable: caller does not have the operator role nor system nor relay"
-              );
+              await expectRevert(this.mock.batchToggleWhitelist(TWO_ADDRESSES, true, { from: attacker }), "OperatorableCallerNotOperatorOrSystemOrRelay()");
             });
           });
           describe("functional", () => {
@@ -133,7 +127,7 @@ contract("Whitelist", ([admin, operator, system, relay, user, attacker]) => {
                   it("revert from attacker", async () => {
                     await expectRevert(
                       this.mock.batchToggleWhitelist(TWO_ADDRESSES, false, { from: attacker }),
-                      "Operatorable: caller does not have the operator role nor system nor relay"
+                      "OperatorableCallerNotOperatorOrSystemOrRelay()"
                     );
                   });
                 });

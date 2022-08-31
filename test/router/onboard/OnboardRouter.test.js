@@ -60,10 +60,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
           describe("onboardSystem", () => {
             describe("non-functional", () => {
               it("revert from attacker", async () => {
-                await expectRevert(
-                  this.onboardRouter.onboardSystem(system, ZERO_ADDRESS, { from: attacker }),
-                  "Operatorable: caller does not have the admin role"
-                );
+                await expectRevert(this.onboardRouter.onboardSystem(system, ZERO_ADDRESS, { from: attacker }), "OperatorableCallerNotAdmin()");
               });
             });
             describe("functional", () => {
@@ -116,10 +113,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
           describe("onboardSuperAdmin", () => {
             describe("non-functional", () => {
               it("revert from attacker", async () => {
-                await expectRevert(
-                  this.onboardRouter.onboardSuperAdmin(superAdmin, ZERO_ADDRESS, { from: attacker }),
-                  "Operatorable: caller does not have the admin role"
-                );
+                await expectRevert(this.onboardRouter.onboardSuperAdmin(superAdmin, ZERO_ADDRESS, { from: attacker }), "OperatorableCallerNotAdmin()");
               });
             });
             describe("functional", () => {
@@ -185,10 +179,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
           describe("onboardBlocker", () => {
             describe("non-functional", () => {
               it("revert from attacker", async () => {
-                await expectRevert(
-                  this.onboardRouter.onboardBlocker(blocker, ZERO_ADDRESS, { from: attacker }),
-                  "Operatorable: caller does not have the admin role"
-                );
+                await expectRevert(this.onboardRouter.onboardBlocker(blocker, ZERO_ADDRESS, { from: attacker }), "OperatorableCallerNotAdmin()");
               });
             });
             describe("functional", () => {
@@ -241,10 +232,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
           describe("onboardTrader", () => {
             describe("non-functional", () => {
               it("revert from attacker", async () => {
-                await expectRevert(
-                  this.onboardRouter.onboardTrader(trader, ZERO_ADDRESS, { from: attacker }),
-                  "Operatorable: caller does not have the admin role"
-                );
+                await expectRevert(this.onboardRouter.onboardTrader(trader, ZERO_ADDRESS, { from: attacker }), "OperatorableCallerNotAdmin()");
               });
             });
             describe("functional", () => {
@@ -302,10 +290,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
               describe("changeAdminToTrader", () => {
                 describe("non-functional", () => {
                   it("revert from attacker", async () => {
-                    await expectRevert(
-                      this.onboardRouter.changeAdminToTrader(secondAdmin, ZERO_ADDRESS, { from: attacker }),
-                      "Operatorable: caller does not have the admin role"
-                    );
+                    await expectRevert(this.onboardRouter.changeAdminToTrader(secondAdmin, ZERO_ADDRESS, { from: attacker }), "OperatorableCallerNotAdmin()");
                   });
                   describe("when admin not set", () => {
                     beforeEach(async () => {
@@ -314,7 +299,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
                     it("revert chaning admin to trader", async () => {
                       await expectRevert(
                         this.onboardRouter.changeAdminToTrader(secondAdmin, ZERO_ADDRESS, { from: admin }),
-                        "Roles: account does not have role"
+                        `RolesAccountDoesNotHaveRole("${secondAdmin}")`
                       );
                     });
                   });
@@ -355,7 +340,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
                   it("revert from attacker", async () => {
                     await expectRevert(
                       this.onboardRouter.changeAdminToSuperAdmin(investor, this.whitelistNonDefault.address, { from: attacker }),
-                      "Operatorable: caller does not have the admin role"
+                      "OperatorableCallerNotAdmin()"
                     );
                   });
                   describe("when admin not set", () => {
@@ -365,7 +350,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
                     it("revert chaning admin to super admin", async () => {
                       await expectRevert(
                         this.onboardRouter.changeAdminToSuperAdmin(secondAdmin, this.whitelistNonDefault.address, { from: admin }),
-                        "OnboardRouter: selected account does not have admin privileges"
+                        `OnboardRouterAccountNotAdmin("${secondAdmin}")`
                       );
                     });
                   });
@@ -409,10 +394,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
               describe("changeOperatorToTrader", () => {
                 describe("non-functional", () => {
                   it("revert from attacker", async () => {
-                    await expectRevert(
-                      this.onboardRouter.changeOperatorToTrader(operator, ZERO_ADDRESS, { from: attacker }),
-                      "Operatorable: caller does not have the admin role"
-                    );
+                    await expectRevert(this.onboardRouter.changeOperatorToTrader(operator, ZERO_ADDRESS, { from: attacker }), "OperatorableCallerNotAdmin()");
                   });
                   describe("when operator not set", () => {
                     beforeEach(async () => {
@@ -421,7 +403,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
                     it("revert chaning admin to trader", async () => {
                       await expectRevert(
                         this.onboardRouter.changeOperatorToTrader(operator, ZERO_ADDRESS, { from: admin }),
-                        "Roles: account does not have role"
+                        `RolesAccountDoesNotHaveRole("${operator}")`
                       );
                     });
                   });
@@ -462,7 +444,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
                   it("revert from attacker", async () => {
                     await expectRevert(
                       this.onboardRouter.changeOperatorToSuperAdmin(operator, ZERO_ADDRESS, { from: attacker }),
-                      "Operatorable: caller does not have the admin role"
+                      "OperatorableCallerNotAdmin()"
                     );
                   });
                   describe("when operator not set", () => {
@@ -472,7 +454,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
                     it("revert chaning admin to trader", async () => {
                       await expectRevert(
                         this.onboardRouter.changeOperatorToSuperAdmin(operator, ZERO_ADDRESS, { from: admin }),
-                        "OnboardRouter: selected account does not have operator privileges"
+                        `OnboardRouterAccountNotOperator("${operator}")`
                       );
                     });
                   });
@@ -521,10 +503,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
                   describe("changeTraderToOperator", () => {
                     describe("non-functional", () => {
                       it("revert from attacker", async () => {
-                        await expectRevert(
-                          this.onboardRouter.changeTraderToOperator(trader, ZERO_ADDRESS, { from: attacker }),
-                          "Operatorable: caller does not have the admin role"
-                        );
+                        await expectRevert(this.onboardRouter.changeTraderToOperator(trader, ZERO_ADDRESS, { from: attacker }), "OperatorableCallerNotAdmin()");
                       });
                       describe("when trader not set", () => {
                         beforeEach(async () => {
@@ -533,7 +512,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
                         it("revert changing trader to operator", async () => {
                           await expectRevert(
                             this.onboardRouter.changeTraderToOperator(trader, ZERO_ADDRESS, { from: admin }),
-                            "Roles: account does not have role"
+                            `RolesAccountDoesNotHaveRole("${trader}")`
                           );
                         });
                       });
@@ -572,10 +551,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
                   describe("changeTraderToAdmin", () => {
                     describe("non-functional", () => {
                       it("revert from attacker", async () => {
-                        await expectRevert(
-                          this.onboardRouter.changeTraderToAdmin(trader, ZERO_ADDRESS, { from: attacker }),
-                          "Operatorable: caller does not have the admin role"
-                        );
+                        await expectRevert(this.onboardRouter.changeTraderToAdmin(trader, ZERO_ADDRESS, { from: attacker }), "OperatorableCallerNotAdmin()");
                       });
                       describe("when trader not set", () => {
                         beforeEach(async () => {
@@ -584,7 +560,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
                         it("revert chaning admin to trader", async () => {
                           await expectRevert(
                             this.onboardRouter.changeTraderToAdmin(trader, ZERO_ADDRESS, { from: admin }),
-                            "Roles: account does not have role"
+                            `RolesAccountDoesNotHaveRole("${trader}")`
                           );
                         });
                       });
@@ -637,13 +613,13 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
                       it("revert from attacker", async () => {
                         await expectRevert(
                           this.onboardRouter.changeSuperAdminToAdmin(superAdmin, ZERO_ADDRESS, { from: attacker }),
-                          "Operatorable: caller does not have the admin role"
+                          `OperatorableCallerNotAdmin()`
                         );
                       });
                       it("revert when account not admin", async () => {
                         await expectRevert(
                           this.onboardRouter.changeSuperAdminToAdmin(attacker, ZERO_ADDRESS, { from: admin }),
-                          "OnboardRouter: account is not admin"
+                          `OnboardRouterAccountNotAdmin("${attacker}")`
                         );
                       });
                       describe("when trader not set", () => {
@@ -653,7 +629,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
                         it("revert changing trader to operator", async () => {
                           await expectRevert(
                             this.onboardRouter.changeSuperAdminToAdmin(superAdmin, ZERO_ADDRESS, { from: admin }),
-                            "Roles: account does not have role"
+                            `RolesAccountDoesNotHaveRole("${superAdmin}")`
                           );
                         });
                       });
@@ -700,13 +676,13 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
                       it("revert from attacker", async () => {
                         await expectRevert(
                           this.onboardRouter.changeSuperAdminToOperator(superAdmin, ZERO_ADDRESS, { from: attacker }),
-                          "Operatorable: caller does not have the admin role"
+                          "OperatorableCallerNotAdmin()"
                         );
                       });
                       it("revert when account not admin", async () => {
                         await expectRevert(
                           this.onboardRouter.changeSuperAdminToOperator(attacker, ZERO_ADDRESS, { from: admin }),
-                          "OnboardRouter: account is not admin"
+                          `OnboardRouterAccountNotAdmin("${attacker}")`
                         );
                       });
                       describe("when trader not set", () => {
@@ -716,7 +692,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
                         it("revert changing trader to operator", async () => {
                           await expectRevert(
                             this.onboardRouter.changeSuperAdminToOperator(superAdmin, ZERO_ADDRESS, { from: admin }),
-                            "Roles: account does not have role"
+                            `RolesAccountDoesNotHaveRole("${superAdmin}")`
                           );
                         });
                       });
@@ -768,10 +744,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
             describe("from operator", () => {
               describe("non-functional", () => {
                 it("revert from attacker", async () => {
-                  await expectRevert(
-                    this.onboardRouter.onboardInvestor(investor, ZERO_ADDRESS, { from: attacker }),
-                    "Operatorable: caller does not have the operator role nor system"
-                  );
+                  await expectRevert(this.onboardRouter.onboardInvestor(investor, ZERO_ADDRESS, { from: attacker }), "OperatorableCallerNotOperatorOrSystem()");
                 });
               });
               describe("functional", () => {
@@ -827,10 +800,7 @@ contract("OnboardRouter", ([admin, secondAdmin, operator, system, superAdmin, bl
             describe("from system", () => {
               describe("non-functional", () => {
                 it("revert from attacker", async () => {
-                  await expectRevert(
-                    this.onboardRouter.onboardInvestor(investor, ZERO_ADDRESS, { from: attacker }),
-                    "Operatorable: caller does not have the operator role nor system"
-                  );
+                  await expectRevert(this.onboardRouter.onboardInvestor(investor, ZERO_ADDRESS, { from: attacker }), "OperatorableCallerNotOperatorOrSystem()");
                 });
               });
               describe("functional", () => {

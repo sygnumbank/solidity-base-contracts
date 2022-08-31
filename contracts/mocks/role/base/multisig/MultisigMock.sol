@@ -5,12 +5,12 @@
  *      This contract is excluded from the audit.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 contract MultisigMock {
     bool public aVariable;
 
-    constructor() public {
+    constructor() {
         aVariable = true;
     }
 }

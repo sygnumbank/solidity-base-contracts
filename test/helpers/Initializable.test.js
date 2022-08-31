@@ -17,10 +17,10 @@ contract("Initializable", ([admin]) => {
       });
       describe("non-functional", () => {
         it("revert re-initializing", async () => {
-          await expectRevert(this.mock.initialize(), "Initializable: Contract instance has already been initialized");
+          await expectRevert(this.mock.initialize(), "InitializableContractAlreadyInitialized()");
         });
         it("revert nested re-initialization", async () => {
-          await expectRevert(this.mock.initializeNested(), "Initializable: Contract instance has already been initialized");
+          await expectRevert(this.mock.initializeNested(), "InitializableContractAlreadyInitialized()");
         });
       });
     });

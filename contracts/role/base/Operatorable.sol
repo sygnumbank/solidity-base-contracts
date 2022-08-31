@@ -5,7 +5,7 @@
  *       contracts.
  */
 
-pragma solidity 0.5.12;
+pragma solidity 0.8.8;
 
 import "../interface/IBaseOperators.sol";
 import "../../helpers/Initializable.sol";
@@ -14,6 +14,71 @@ contract Operatorable is Initializable {
     IBaseOperators internal operatorsInst;
     address private operatorsPending;
 
+    /**
+     * @dev Error: "Operatorable: caller does not have the operator role"
+     */
+    error OperatorableCallerNotOperator();
+
+    /**
+     * @dev Error: "Operatorable: caller does not have the admin role"
+     */
+    error OperatorableCallerNotAdmin();
+
+    /**
+     * @dev Error: "Operatorable: caller does not have the system role"
+     */
+    error OperatorableCallerNotSystem();
+
+    /**
+     * @dev Error: "Operatorable: caller does not have the multisig role"
+     */
+    error OperatorableCallerNotMultisig();
+
+    /**
+     * @dev Error: "Operatorable: caller does not have the admin or system role"
+     */
+    error OperatorableCallerNotAdminOrSystem();
+
+    /**
+     * @dev Error: "Operatorable: caller does not have the operator role nor system"
+     */
+    error OperatorableCallerNotOperatorOrSystem();
+
+    /**
+     * @dev Error: "Operatorable: caller does not have the relay role"
+     */
+    error OperatorableCallerNotRelay();
+
+    /**
+     * @dev Error: "Operatorable: caller does not have the operator role nor relay"
+     */
+    error OperatorableCallerNotOperatorOrRelay();
+
+    /**
+     * @dev Error: "Operatorable: caller does not have the admin role nor relay"
+     */
+    error OperatorableCallerNotAdminOrRelay();
+
+    /**
+     * @dev Error: "Operatorable: caller does not have the operator role nor system nor relay"
+     */
+    error OperatorableCallerNotOperatorOrSystemOrRelay();
+
+    /**
+     * @dev Error: "OperatorableCallerNotOperator() nor admin nor relay"
+     */
+    error OperatorableCallerNotOperatorOrAdminOrRelay();
+
+    /**
+     * @dev Error: "Operatorable: address of new operators contract can not be zero"
+     */
+    error OperatorableNewOperatorsZeroAddress();
+
+    /**
+     * @dev Error: "Operatorable: should be called from new operators contract"
+     */
+    error OperatorableCallerNotOperatorsContract(address _caller);
+
     event OperatorsContractChanged(address indexed caller, address indexed operatorsAddress);
     event OperatorsContractPending(address indexed caller, address indexed operatorsAddress);
 
@@ -21,7 +86,7 @@ contract Operatorable is Initializable {
      * @dev Reverts if sender does not have operator role associated.
      */
     modifier onlyOperator() {
-        require(isOperator(msg.sender), "Operatorable: caller does not have the operator role");
+        if (!isOperator(msg.sender)) revert OperatorableCallerNotOperator();
         _;
     }
 
@@ -29,7 +94,7 @@ contract Operatorable is Initializable {
      * @dev Reverts if sender does not have admin role associated.
      */
     modifier onlyAdmin() {
-        require(isAdmin(msg.sender), "Operatorable: caller does not have the admin role");
+        if (!isAdmin(msg.sender)) revert OperatorableCallerNotAdmin();
         _;
     }
 
@@ -37,7 +102,7 @@ contract Operatorable is Initializable {
      * @dev Reverts if sender does not have system role associated.
      */
     modifier onlySystem() {
-        require(isSystem(msg.sender), "Operatorable: caller does not have the system role");
+        if (!isSystem(msg.sender)) revert OperatorableCallerNotSystem();
         _;
     }
 
@@ -45,7 +110,7 @@ contract Operatorable is Initializable {
      * @dev Reverts if sender does not have multisig privileges.
      */
     modifier onlyMultisig() {
-        require(isMultisig(msg.sender), "Operatorable: caller does not have multisig role");
+        if (!isMultisig(msg.sender)) revert OperatorableCallerNotMultisig();
         _;
     }
 
@@ -53,7 +118,7 @@ contract Operatorable is Initializable {
      * @dev Reverts if sender does not have admin or system role associated.
      */
     modifier onlyAdminOrSystem() {
-        require(isAdminOrSystem(msg.sender), "Operatorable: caller does not have the admin role nor system");
+        if (!isAdminOrSystem(msg.sender)) revert OperatorableCallerNotAdminOrSystem();
         _;
     }
 
@@ -61,7 +126,7 @@ contract Operatorable is Initializable {
      * @dev Reverts if sender does not have operator or system role associated.
      */
     modifier onlyOperatorOrSystem() {
-        require(isOperatorOrSystem(msg.sender), "Operatorable: caller does not have the operator role nor system");
+        if (!isOperatorOrSystem(msg.sender)) revert OperatorableCallerNotOperatorOrSystem();
         _;
     }
 
@@ -69,7 +134,7 @@ contract Operatorable is Initializable {
      * @dev Reverts if sender does not have the relay role associated.
      */
     modifier onlyRelay() {
-        require(isRelay(msg.sender), "Operatorable: caller does not have relay role associated");
+        if (!isRelay(msg.sender)) revert OperatorableCallerNotRelay();
         _;
     }
 
@@ -77,10 +142,7 @@ contract Operatorable is Initializable {
      * @dev Reverts if sender does not have relay or operator role associated.
      */
     modifier onlyOperatorOrRelay() {
-        require(
-            isOperator(msg.sender) || isRelay(msg.sender),
-            "Operatorable: caller does not have the operator role nor relay"
-        );
+        if (!isOperator(msg.sender) && !isRelay(msg.sender)) revert OperatorableCallerNotOperatorOrRelay();
         _;
     }
 
@@ -88,10 +150,7 @@ contract Operatorable is Initializable {
      * @dev Reverts if sender does not have relay or admin role associated.
      */
     modifier onlyAdminOrRelay() {
-        require(
-            isAdmin(msg.sender) || isRelay(msg.sender),
-            "Operatorable: caller does not have the admin role nor relay"
-        );
+        if (!isAdmin(msg.sender) && !isRelay(msg.sender)) revert OperatorableCallerNotAdminOrRelay();
         _;
     }
 
@@ -99,10 +158,17 @@ contract Operatorable is Initializable {
      * @dev Reverts if sender does not have the operator, or system, or relay role associated.
      */
     modifier onlyOperatorOrSystemOrRelay() {
-        require(
-            isOperator(msg.sender) || isSystem(msg.sender) || isRelay(msg.sender),
-            "Operatorable: caller does not have the operator role nor system nor relay"
-        );
+        if (!isOperator(msg.sender) && !isSystem(msg.sender) && !isRelay(msg.sender))
+            revert OperatorableCallerNotOperatorOrSystemOrRelay();
+        _;
+    }
+
+    /**
+     * @dev Reverts if sender does not have the operator, or admin, or relay role associated.
+     */
+    modifier onlyOperatorOrAdminOrRelay() {
+        if (!isOperator(msg.sender) && !isAdmin(msg.sender) && !isRelay(msg.sender))
+            revert OperatorableCallerNotOperatorOrAdminOrRelay();
         _;
     }
 
@@ -111,7 +177,7 @@ contract Operatorable is Initializable {
      *       confirmation through the operators contract.
      * @param _baseOperators BaseOperators contract address.
      */
-    function initialize(address _baseOperators) public initializer {
+    function initialize(address _baseOperators) public virtual initializer {
         _setOperatorsContract(_baseOperators);
     }
 
@@ -122,7 +188,8 @@ contract Operatorable is Initializable {
      * @param _baseOperators BaseOperators contract address.
      */
     function setOperatorsContract(address _baseOperators) public onlyAdmin {
-        require(_baseOperators != address(0), "Operatorable: address of new operators contract can not be zero");
+        if (_baseOperators == address(0)) revert OperatorableNewOperatorsZeroAddress();
+
         operatorsPending = _baseOperators;
         emit OperatorsContractPending(msg.sender, _baseOperators);
     }
@@ -132,8 +199,10 @@ contract Operatorable is Initializable {
      *       is the real contract address.
      */
     function confirmOperatorsContract() public {
-        require(operatorsPending != address(0), "Operatorable: address of new operators contract can not be zero");
-        require(msg.sender == operatorsPending, "Operatorable: should be called from new operators contract");
+        if (operatorsPending == address(0)) revert OperatorableNewOperatorsZeroAddress();
+
+        if (msg.sender != operatorsPending) revert OperatorableCallerNotOperatorsContract(msg.sender);
+
         _setOperatorsContract(operatorsPending);
     }
 
@@ -202,7 +271,8 @@ contract Operatorable is Initializable {
 
     /** INTERNAL FUNCTIONS */
     function _setOperatorsContract(address _baseOperators) internal {
-        require(_baseOperators != address(0), "Operatorable: address of new operators contract cannot be zero");
+        if (_baseOperators == address(0)) revert OperatorableNewOperatorsZeroAddress();
+
         operatorsInst = IBaseOperators(_baseOperators);
         emit OperatorsContractChanged(msg.sender, _baseOperators);
     }

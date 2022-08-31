@@ -1,3 +1,4 @@
+/* eslint-disable */
 const BaseOperators = artifacts.require("BaseOperators");
 const Whitelist = artifacts.require("Whitelist");
 

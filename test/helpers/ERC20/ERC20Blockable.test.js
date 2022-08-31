@@ -39,7 +39,7 @@ contract("ERC20Blockable", ([admin, operator, blocker, attacker, user]) => {
                     describe("non-functional", () => {
                       describe("from attacker", () => {
                         beforeEach(async () => {
-                          await expectRevert(this.mock.block(user, BLOCK, { from: attacker }), "BlockerOperatorable: caller is not blocker or operator role");
+                          await expectRevert(this.mock.block(user, BLOCK, { from: attacker }), "BlockerOperatorableCallerNotBlockerOrOperator()");
                         });
                         it("balance not updated", async () => {
                           assert.equal(await this.mock.balanceOf(user), MINT);
@@ -78,10 +78,7 @@ contract("ERC20Blockable", ([admin, operator, blocker, attacker, user]) => {
                           describe("non-functional", () => {
                             describe("from attacker", () => {
                               beforeEach(async () => {
-                                await expectRevert(
-                                  this.mock.unblock(user, BLOCK, { from: attacker }),
-                                  "BlockerOperatorable: caller is not blocker or operator role"
-                                );
+                                await expectRevert(this.mock.unblock(user, BLOCK, { from: attacker }), "BlockerOperatorableCallerNotBlockerOrOperator()");
                               });
                               it("blocked balance not updated", async () => {
                                 assert.equal(await this.mock.blockedBalanceOf(user), BLOCK);

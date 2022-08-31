@@ -12,13 +12,10 @@ contract("RaiseOperatorable", ([owner, admin, attacker]) => {
 
   context("initialization", () => {
     it("revert raiseOperators initialization with zero address", async () => {
-      await expectRevert(this.raiseOperators.initialize(ZERO_ADDRESS), "Operatorable: address of new operators contract cannot be zero");
+      await expectRevert(this.raiseOperators.initialize(ZERO_ADDRESS), "OperatorableNewOperatorsZeroAddress()");
     });
     it("revert RaiseOperatorable initialization with zero address", async () => {
-      await expectRevert(
-        this.raiseOperatorable.initialize(this.baseOperators.address, ZERO_ADDRESS),
-        "RaiseOperatorable: address of new raiseOperators contract can not be zero"
-      );
+      await expectRevert(this.raiseOperatorable.initialize(this.baseOperators.address, ZERO_ADDRESS), "RaiseOperatorableNewRaiseOperatorsAddressZero()");
     });
   });
 
@@ -31,29 +28,20 @@ contract("RaiseOperatorable", ([owner, admin, attacker]) => {
       it("revert attacker init changing", async () => {
         await expectRevert(
           this.raiseOperatorable.setRaiseOperatorsContract(this.raiseOperatorsNew.address, { from: attacker }),
-          "Operatorable: caller does not have the admin role"
+          "OperatorableCallerNotAdmin()"
         );
       });
       it("revert admin pass zero addr for new contract", async () => {
-        await expectRevert(
-          this.raiseOperatorable.setRaiseOperatorsContract(ZERO_ADDRESS, { from: admin }),
-          "RaiseOperatorable: address of new raiseOperators contract can not be zero"
-        );
+        await expectRevert(this.raiseOperatorable.setRaiseOperatorsContract(ZERO_ADDRESS, { from: admin }), "RaiseOperatorableNewRaiseOperatorsAddressZero()");
       });
       it("revert raiseOperators confirm for zero address", async () => {
-        await expectRevert(
-          this.raiseOperatorable.setRaiseOperatorsContract(ZERO_ADDRESS, { from: admin }),
-          "RaiseOperatorable: address of new raiseOperators contract can not be zero"
-        );
+        await expectRevert(this.raiseOperatorable.setRaiseOperatorsContract(ZERO_ADDRESS, { from: admin }), "RaiseOperatorableNewRaiseOperatorsAddressZero()");
       });
     });
     context("two step logic for changing baseOperators contract address in raiseOperatorable instance", () => {
       describe("when pending contract not set", () => {
         it("revert confirm", async () => {
-          await expectRevert(
-            this.raiseOperatorable.confirmRaiseOperatorsContract({ from: admin }),
-            "RaiseOperatorable: address of pending raiseOperators contract can not be zero"
-          );
+          await expectRevert(this.raiseOperatorable.confirmRaiseOperatorsContract({ from: admin }), "RaiseOperatorableNewRaiseOperatorsAddressZero()");
         });
       });
       describe("when pending contract set", () => {
@@ -63,16 +51,10 @@ contract("RaiseOperatorable", ([owner, admin, attacker]) => {
         });
         describe("non-functional", () => {
           it("revert caller not admin - he can not confirm (the second step)", async () => {
-            await expectRevert(
-              this.raiseOperatorsNew.confirmFor(this.raiseOperatorable.address, { from: attacker }),
-              "Operatorable: caller does not have the admin role"
-            );
+            await expectRevert(this.raiseOperatorsNew.confirmFor(this.raiseOperatorable.address, { from: attacker }), "OperatorableCallerNotAdmin()");
           });
           it("revert confirmation if caller is not pending raiseOperators contract address", async () => {
-            await expectRevert(
-              this.raiseOperatorable.confirmRaiseOperatorsContract({ from: admin }),
-              "RaiseOperatorable: should be called from new raiseOperators contract"
-            );
+            await expectRevert(this.raiseOperatorable.confirmRaiseOperatorsContract({ from: admin }), "RaiseOperatorableCallerNotNewRaiseOperator()");
           });
 
           describe("broken contract address", () => {

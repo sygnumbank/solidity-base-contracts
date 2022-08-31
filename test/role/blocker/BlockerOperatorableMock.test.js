@@ -20,7 +20,7 @@ contract("BlockerOperatorableMock", ([admin, operator, attacker]) => {
   describe("blocker action", () => {
     describe("non-functional", () => {
       it("reverts when not blocker", async () => {
-        await expectRevert(this.blockerOperatorableMock.blockerAction({ from: attacker }), "BlockerOperatorable: caller is not blocker");
+        await expectRevert(this.blockerOperatorableMock.blockerAction({ from: attacker }), "BlockerOperatorableCallerNotBlocker()");
       });
     });
     describe("functional", () => {
@@ -33,7 +33,7 @@ contract("BlockerOperatorableMock", ([admin, operator, attacker]) => {
   describe("blocker or operator action", () => {
     describe("non-functional", () => {
       it("reverts when not blocker or operator", async () => {
-        await expectRevert(this.blockerOperatorableMock.blockerOrOperatorAction({ from: attacker }), "BlockerOperatorable: caller is not blocker or operator");
+        await expectRevert(this.blockerOperatorableMock.blockerOrOperatorAction({ from: attacker }), "BlockerOperatorableCallerNotBlockerOrOperator()");
       });
     });
     describe("functional", () => {

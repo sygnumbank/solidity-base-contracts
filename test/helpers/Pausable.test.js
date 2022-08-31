@@ -43,23 +43,23 @@ contract("Pausable", ([admin, operator, trader, system, attacker]) => {
                   });
                   describe("non-functional", () => {
                     it("revert pause action when not paused from operator", async () => {
-                      await expectRevert(this.mock.pausedAction({ from: operator }), "Pausable: not paused");
+                      await expectRevert(this.mock.pausedAction({ from: operator }), "PausableNotPaused()");
                     });
                     it("revert pause action when not paused from system", async () => {
-                      await expectRevert(this.mock.pausedAction({ from: system }), "Pausable: not paused");
+                      await expectRevert(this.mock.pausedAction({ from: system }), "PausableNotPaused()");
                     });
                     it("revert pause action when not paused from trader", async () => {
-                      await expectRevert(this.mock.pausedAction({ from: trader }), "Pausable: not paused");
+                      await expectRevert(this.mock.pausedAction({ from: trader }), "PausableNotPaused()");
                     });
                     it("revert pause from attacker", async () => {
-                      await expectRevert(this.mock.pause({ from: attacker }), "TraderOperatorable: caller is not trader or operator or system");
+                      await expectRevert(this.mock.pause({ from: attacker }), "TraderOperatorableCallerNotTraderOrOperatorOrSystem()");
                     });
                     describe("revert pausing if already paused", () => {
                       beforeEach(async () => {
                         await this.mock.pause({ from: operator });
                       });
                       it("revert re-pause", async () => {
-                        await expectRevert(this.mock.pause({ from: operator }), "Pausable: paused");
+                        await expectRevert(this.mock.pause({ from: operator }), "PausablePaused()");
                       });
                     });
                     describe("functional", () => {
@@ -113,23 +113,23 @@ contract("Pausable", ([admin, operator, trader, system, attacker]) => {
                         describe("unpausing", () => {
                           describe("non-functional", () => {
                             it("revert unpause action when not unpaused", async () => {
-                              await expectRevert(this.mock.unpausedAction({ from: operator }), "Pausable: paused");
+                              await expectRevert(this.mock.unpausedAction({ from: operator }), "PausablePaused()");
                             });
                             it("revert pause action when not paused from system", async () => {
-                              await expectRevert(this.mock.unpausedAction({ from: system }), "Pausable: paused");
+                              await expectRevert(this.mock.unpausedAction({ from: system }), "PausablePaused()");
                             });
                             it("revert pause action when not paused from trader", async () => {
-                              await expectRevert(this.mock.unpausedAction({ from: trader }), "Pausable: paused");
+                              await expectRevert(this.mock.unpausedAction({ from: trader }), "PausablePaused()");
                             });
                             it("revert unpause from attacker", async () => {
-                              await expectRevert(this.mock.unpause({ from: attacker }), "TraderOperatorable: caller is not trader or operator or system");
+                              await expectRevert(this.mock.unpause({ from: attacker }), "TraderOperatorableCallerNotTraderOrOperatorOrSystem()");
                             });
                             describe("revert unpause if not paused", () => {
                               beforeEach(async () => {
                                 await this.mock.unpause({ from: operator });
                               });
                               it("revert re-pause", async () => {
-                                await expectRevert(this.mock.unpause({ from: operator }), "Pausable: not paused");
+                                await expectRevert(this.mock.unpause({ from: operator }), "PausableNotPaused()");
                               });
                             });
                           });

@@ -18,13 +18,13 @@ contract("Freezable", ([admin, operator, system, user, attacker]) => {
         context("freeze", () => {
           describe("non-functional", () => {
             it("revert from attacker", async () => {
-              await expectRevert(this.mock.toggleFreeze(user, true, { from: attacker }), "Operatorable: caller does not have the operator role");
+              await expectRevert(this.mock.toggleFreeze(user, true, { from: attacker }), "OperatorableCallerNotOperator()");
             });
             it("revert empty address", async () => {
-              await expectRevert(this.mock.toggleFreeze(ZERO_ADDRESS, true, { from: operator }), "Freezable: Empty address");
+              await expectRevert(this.mock.toggleFreeze(ZERO_ADDRESS, true, { from: operator }), "FreezableZeroAddress()");
             });
             it("revert frozen action when unfrozen", async () => {
-              await expectRevert(this.mock.frozenAction({ from: user }), "Freezable: account is not frozen");
+              await expectRevert(this.mock.frozenAction({ from: user }), "FreezableAccountNotFrozen()");
             });
           });
           describe("functional", () => {
@@ -45,13 +45,13 @@ contract("Freezable", ([admin, operator, system, user, attacker]) => {
             context("unfreeze", () => {
               describe("non-functional", () => {
                 it("revert from attacker", async () => {
-                  await expectRevert(this.mock.toggleFreeze(user, false, { from: attacker }), "Operatorable: caller does not have the operator role");
+                  await expectRevert(this.mock.toggleFreeze(user, false, { from: attacker }), "OperatorableCallerNotOperator()");
                 });
                 it("revert empty address", async () => {
-                  await expectRevert(this.mock.toggleFreeze(ZERO_ADDRESS, false, { from: operator }), "Freezable: Empty address");
+                  await expectRevert(this.mock.toggleFreeze(ZERO_ADDRESS, false, { from: operator }), "FreezableZeroAddress()");
                 });
                 it("revert unfrozen action when frozen", async () => {
-                  await expectRevert(this.mock.unfrozenAction({ from: user }), "Freezable: account is frozen");
+                  await expectRevert(this.mock.unfrozenAction({ from: user }), "FreezableAccountFrozen()");
                 });
               });
               describe("functional", () => {
@@ -78,7 +78,10 @@ contract("Freezable", ([admin, operator, system, user, attacker]) => {
         describe("freeze", () => {
           describe("non-functional", () => {
             it("revert when batch greater than 256", async () => {
-              await expectRevert(this.mock.batchToggleFreeze(THREE_HUNDRED_ADDRESS, true, { from: operator }), "Freezable: batch count is greater than 256");
+              await expectRevert(
+                this.mock.batchToggleFreeze(THREE_HUNDRED_ADDRESS, true, { from: operator }),
+                `FreezableBatchCountTooLarge(${THREE_HUNDRED_ADDRESS.length})`
+              );
             });
           });
           describe("functional", () => {
@@ -96,7 +99,7 @@ contract("Freezable", ([admin, operator, system, user, attacker]) => {
                 it("revert when batch greater than 256", async () => {
                   await expectRevert(
                     this.mock.batchToggleFreeze(THREE_HUNDRED_ADDRESS, false, { from: operator }),
-                    "Freezable: batch count is greater than 256"
+                    `FreezableBatchCountTooLarge(${THREE_HUNDRED_ADDRESS.length})`
                   );
                 });
               });

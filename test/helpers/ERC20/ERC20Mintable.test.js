@@ -19,14 +19,14 @@ contract("ERC20Mintable", ([admin, operator, system, attacker, user]) => {
           describe("non-functional", () => {
             describe("revert from attacker", () => {
               beforeEach(async () => {
-                await expectRevert(this.mock.mint(user, MINT, { from: attacker }), "Operatorable: caller does not have the operator role nor system");
+                await expectRevert(this.mock.mint(user, MINT, { from: attacker }), "OperatorableCallerNotOperatorOrSystem()");
               });
               it("balance not updated", async () => {
                 assert.equal(await this.mock.balanceOf(user), MINT - MINT);
               });
             });
             it("revert mint balance equal to zero", async () => {
-              await expectRevert(this.mock.mint(user, 0, { from: operator }), "ERC20Mintable: amount has to be greater than 0");
+              await expectRevert(this.mock.mint(user, 0, { from: operator }), "ERC20MintableZeroMintAmount()");
             });
           });
           describe("functional", () => {

@@ -20,7 +20,7 @@ contract("OperatorableMock", ([admin, operator, system, multisig, attacker]) => 
     context("operator action", () => {
       describe("non-functional", () => {
         it("reverts when not operator", async () => {
-          await expectRevert(this.operatorableMock.operatorAction({ from: attacker }), "Operatorable: caller does not have the operator role");
+          await expectRevert(this.operatorableMock.operatorAction({ from: attacker }), "OperatorableCallerNotOperator()");
         });
       });
       describe("functional", () => {
@@ -38,7 +38,7 @@ contract("OperatorableMock", ([admin, operator, system, multisig, attacker]) => 
     describe("system action", () => {
       describe("non-functional", () => {
         it("reverts when not system", async () => {
-          await expectRevert(this.operatorableMock.systemAction({ from: attacker }), "Operatorable: caller does not have the system role");
+          await expectRevert(this.operatorableMock.systemAction({ from: attacker }), "OperatorableCallerNotSystem()");
         });
       });
       describe("functional", () => {
@@ -56,7 +56,7 @@ contract("OperatorableMock", ([admin, operator, system, multisig, attacker]) => 
     describe("relay action", () => {
       describe("non-functional", () => {
         it("reverts when not relay", async () => {
-          await expectRevert(this.operatorableMock.relayAction({ from: attacker }), "Operatorable: caller does not have relay role associated");
+          await expectRevert(this.operatorableMock.relayAction({ from: attacker }), "OperatorableCallerNotRelay()");
         });
       });
       describe("functional", () => {
@@ -70,7 +70,7 @@ contract("OperatorableMock", ([admin, operator, system, multisig, attacker]) => 
     describe("multisig action", () => {
       describe("non-functional", () => {
         it("reverts when not multisig", async () => {
-          await expectRevert(this.operatorableMock.multisigAction({ from: attacker }), "Operatorable: caller does not have multisig role");
+          await expectRevert(this.operatorableMock.multisigAction({ from: attacker }), "OperatorableCallerNotMultisig()");
         });
       });
       describe("functional", () => {
@@ -88,7 +88,7 @@ contract("OperatorableMock", ([admin, operator, system, multisig, attacker]) => 
     describe("admin or system action", () => {
       describe("non-functional", () => {
         it("reverts when not system nor admin", async () => {
-          await expectRevert(this.operatorableMock.adminOrSystemAction({ from: attacker }), "Operatorable: caller does not have the admin role nor system");
+          await expectRevert(this.operatorableMock.adminOrSystemAction({ from: attacker }), "OperatorableCallerNotAdminOrSystem()");
         });
       });
       describe("functional", () => {
@@ -114,10 +114,7 @@ contract("OperatorableMock", ([admin, operator, system, multisig, attacker]) => 
     describe("operator or system action", () => {
       describe("non-functional", () => {
         it("reverts when not operator nor system", async () => {
-          await expectRevert(
-            this.operatorableMock.operatorOrSystemAction({ from: attacker }),
-            "Operatorable: caller does not have the operator role nor system"
-          );
+          await expectRevert(this.operatorableMock.operatorOrSystemAction({ from: attacker }), "OperatorableCallerNotOperatorOrSystem()");
         });
       });
       describe("functional", () => {
@@ -143,7 +140,7 @@ contract("OperatorableMock", ([admin, operator, system, multisig, attacker]) => 
     describe("operator or relay action", () => {
       describe("non-functional", () => {
         it("reverts when not operator nor system", async () => {
-          await expectRevert(this.operatorableMock.operatorOrRelayAction({ from: attacker }), "Operatorable: caller does not have the operator role nor relay");
+          await expectRevert(this.operatorableMock.operatorOrRelayAction({ from: attacker }), "OperatorableCallerNotOperatorOrRelay()");
         });
       });
       describe("functional", () => {
@@ -166,7 +163,7 @@ contract("OperatorableMock", ([admin, operator, system, multisig, attacker]) => 
     describe("admin or relay action", () => {
       describe("non-functional", () => {
         it("reverts when not operator nor system", async () => {
-          await expectRevert(this.operatorableMock.adminOrRelayAction({ from: attacker }), "Operatorable: caller does not have the admin role nor relay");
+          await expectRevert(this.operatorableMock.adminOrRelayAction({ from: attacker }), "OperatorableCallerNotAdminOrRelay()");
         });
       });
       describe("functional", () => {
@@ -189,10 +186,7 @@ contract("OperatorableMock", ([admin, operator, system, multisig, attacker]) => 
     describe("operator or system or relay action", () => {
       describe("non-functional", () => {
         it("reverts when not operator nor system nor relay", async () => {
-          await expectRevert(
-            this.operatorableMock.operatorOrSystemOrRelayAction({ from: attacker }),
-            "Operatorable: caller does not have the operator role nor system nor relay"
-          );
+          await expectRevert(this.operatorableMock.operatorOrSystemOrRelayAction({ from: attacker }), "OperatorableCallerNotOperatorOrSystemOrRelay()");
         });
       });
       describe("functional", () => {

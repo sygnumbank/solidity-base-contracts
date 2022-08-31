@@ -1,15 +1,18 @@
+// SPDX-License-Identifier: UNLICENSED
+
 /**
  * @title ERC20Blockable
  * @author Team 3301 <team3301@sygnum.com>
  * @dev For blocking and unblocking particular user funds.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "./ERC20Overload/ERC20.sol";
 import "../../role/blocker/BlockerOperatorable.sol";
 
 contract ERC20Blockable is ERC20, BlockerOperatorable {
+    using SafeMath for uint256;
     uint256 public totalBlockedBalance;
 
     mapping(address => uint256) public _blockedBalances;

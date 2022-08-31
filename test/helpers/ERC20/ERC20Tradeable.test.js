@@ -35,7 +35,7 @@ contract("ERC20Tradeable", ([admin, trader, user, spender, attacker]) => {
                   describe("non-functional", () => {
                     describe("from attacker", () => {
                       beforeEach(async () => {
-                        await expectRevert(this.mock.approveOnBehalf(user, spender, APPROVAL, { from: attacker }), "TraderOperatorable: caller is not trader");
+                        await expectRevert(this.mock.approveOnBehalf(user, spender, APPROVAL, { from: attacker }), "TraderOperatorableCallerNotTrader()");
                       });
                       it("balance not updated", async () => {
                         assert.equal(await this.mock.balanceOf(user), MINT);

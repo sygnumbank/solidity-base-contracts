@@ -1,10 +1,12 @@
+// SPDX-License-Identifier: UNLICENSED
+
 /**
  * @title ERC20Freezable
  * @author Team 3301 <team3301@sygnum.com>
  * @dev Overloading ERC20 functions to ensure client addresses are not frozen for particular actions.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "./ERC20Overload/ERC20.sol";
 import "../Freezable.sol";
@@ -15,7 +17,14 @@ contract ERC20Freezable is ERC20, Freezable {
      * @param to address that recieves the funds.
      * @param value amount of funds.
      */
-    function transfer(address to, uint256 value) public whenNotFrozen(msg.sender) whenNotFrozen(to) returns (bool) {
+    function transfer(address to, uint256 value)
+        public
+        virtual
+        override
+        whenNotFrozen(msg.sender)
+        whenNotFrozen(to)
+        returns (bool)
+    {
         return super.transfer(to, value);
     }
 
@@ -26,6 +35,8 @@ contract ERC20Freezable is ERC20, Freezable {
      */
     function approve(address spender, uint256 value)
         public
+        virtual
+        override
         whenNotFrozen(msg.sender)
         whenNotFrozen(spender)
         returns (bool)
@@ -43,7 +54,7 @@ contract ERC20Freezable is ERC20, Freezable {
         address from,
         address to,
         uint256 value
-    ) public whenNotFrozen(msg.sender) whenNotFrozen(from) whenNotFrozen(to) returns (bool) {
+    ) public virtual override whenNotFrozen(msg.sender) whenNotFrozen(from) whenNotFrozen(to) returns (bool) {
         return super.transferFrom(from, to, value);
     }
 
@@ -54,6 +65,8 @@ contract ERC20Freezable is ERC20, Freezable {
      */
     function increaseAllowance(address spender, uint256 addedValue)
         public
+        virtual
+        override
         whenNotFrozen(msg.sender)
         whenNotFrozen(spender)
         returns (bool)
@@ -68,6 +81,8 @@ contract ERC20Freezable is ERC20, Freezable {
      */
     function decreaseAllowance(address spender, uint256 subtractedValue)
         public
+        virtual
+        override
         whenNotFrozen(msg.sender)
         whenNotFrozen(spender)
         returns (bool)
@@ -80,7 +95,13 @@ contract ERC20Freezable is ERC20, Freezable {
      * @param account account that funds will be burned from.
      * @param amount amount of funds to be burned.
      */
-    function _burnFrom(address account, uint256 amount) internal whenNotFrozen(msg.sender) whenNotFrozen(account) {
+    function _burnFrom(address account, uint256 amount)
+        internal
+        virtual
+        override
+        whenNotFrozen(msg.sender)
+        whenNotFrozen(account)
+    {
         super._burnFrom(account, amount);
     }
 }

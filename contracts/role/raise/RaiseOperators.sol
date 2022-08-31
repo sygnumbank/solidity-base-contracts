@@ -4,9 +4,9 @@
  * @dev For managing account privileges associated to the capital raise process: investors, and issuers.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
-import "openzeppelin-solidity/contracts/access/Roles.sol";
+import "../Roles.sol";
 import "../base/Operatorable.sol";
 import "./RaiseOperatorable.sol";
 

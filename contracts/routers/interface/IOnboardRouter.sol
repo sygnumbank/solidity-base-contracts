@@ -3,44 +3,44 @@
  * @notice Interface for OnboardRouter contract
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
-contract IOnboardRouter {
-    function isWhitelisted(address _account, address _whitelist) external returns (bool);
+abstract contract IOnboardRouter {
+    function isWhitelisted(address _account, address _whitelist) external virtual returns (bool);
 
-    function onboardSystem(address _account, address _whitelist) external;
+    function onboardSystem(address _account, address _whitelist) external virtual;
 
-    function deboardSystem(address _account, address _whitelist) external;
+    function deboardSystem(address _account, address _whitelist) external virtual;
 
-    function onboardSuperAdmin(address _account, address _whitelist) external;
+    function onboardSuperAdmin(address _account, address _whitelist) external virtual;
 
-    function deboardSuperAdmin(address _account, address _whitelist) external;
+    function deboardSuperAdmin(address _account, address _whitelist) external virtual;
 
-    function onboardInvestor(address _account, address _whitelist) external;
+    function onboardInvestor(address _account, address _whitelist) external virtual;
 
-    function deboardInvestor(address _account, address _whitelist) external;
+    function deboardInvestor(address _account, address _whitelist) external virtual;
 
-    function onboardTrader(address _account, address _whitelist) external;
+    function onboardTrader(address _account, address _whitelist) external virtual;
 
-    function deboardTrader(address _account, address _whitelist) external;
+    function deboardTrader(address _account, address _whitelist) external virtual;
 
-    function onboardBlocker(address _account, address _whitelist) external;
+    function onboardBlocker(address _account, address _whitelist) external virtual;
 
-    function deboardBlocker(address _account, address _whitelist) external;
+    function deboardBlocker(address _account, address _whitelist) external virtual;
 
-    function changeAdminToTrader(address _account, address _whitelist) external;
+    function changeAdminToTrader(address _account, address _whitelist) external virtual;
 
-    function changeAdminToSuperAdmin(address _account, address _whitelist) external;
+    function changeAdminToSuperAdmin(address _account, address _whitelist) external virtual;
 
-    function changeOperatorToTrader(address _account, address _whitelist) external;
+    function changeOperatorToTrader(address _account, address _whitelist) external virtual;
 
-    function changeOperatorToSuperAdmin(address _account, address _whitelist) external;
+    function changeOperatorToSuperAdmin(address _account, address _whitelist) external virtual;
 
-    function changeTraderToAdmin(address _account, address _whitelist) external;
+    function changeTraderToAdmin(address _account, address _whitelist) external virtual;
 
-    function changeTraderToOperator(address _account, address _whitelist) external;
+    function changeTraderToOperator(address _account, address _whitelist) external virtual;
 
-    function changeSuperAdminToAdmin(address _account, address _whitelist) external;
+    function changeSuperAdminToAdmin(address _account, address _whitelist) external virtual;
 
-    function changeSuperAdminToOperator(address _account, address _whitelist) external;
+    function changeSuperAdminToOperator(address _account, address _whitelist) external virtual;
 }

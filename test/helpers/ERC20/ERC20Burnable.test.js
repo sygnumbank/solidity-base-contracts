@@ -25,7 +25,7 @@ contract("ERC20Burnable", ([admin, operator, attacker, user]) => {
             describe("non-functional", () => {
               describe("from attacker", () => {
                 beforeEach(async () => {
-                  await expectRevert(this.mock.burnFor(user, BURN, { from: attacker }), "Operatorable: caller does not have the operator role.");
+                  await expectRevert(this.mock.burnFor(user, BURN, { from: attacker }), "OperatorableCallerNotOperator()");
                 });
                 it("balance not updated", async () => {
                   assert.equal(await this.mock.balanceOf(user), MINT);

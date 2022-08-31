@@ -15,7 +15,7 @@ contract("TraderOperatorable", ([owner, admin, operator, attacker]) => {
       it("revert traderOperatorable initialization with zero address", async () => {
         await expectRevert(
           this.traderOperatorable.initialize(this.baseOperators.address, ZERO_ADDRESS, { from: admin }),
-          "TraderOperatorable: address of new traderOperators contract can not be zero"
+          "TraderOperatorableNewTraderOperatorsAddressZero()"
         );
       });
     });
@@ -35,10 +35,7 @@ contract("TraderOperatorable", ([owner, admin, operator, attacker]) => {
         });
         describe("non-functional", () => {
           it("can not be initialized twice", async () => {
-            await expectRevert(
-              this.traderOperatorable.initialize(this.traderOperators.address),
-              "Initializable: Contract instance has already been initialized"
-            );
+            await expectRevert(this.traderOperatorable.initialize(this.traderOperators.address), "InitializableContractAlreadyInitialized()");
           });
         });
       });
@@ -54,19 +51,19 @@ contract("TraderOperatorable", ([owner, admin, operator, attacker]) => {
       it("revert attacker init changing", async () => {
         await expectRevert(
           this.traderOperatorable.setTraderOperatorsContract(this.traderOperatorsNew.address, { from: attacker }),
-          "Operatorable: caller does not have the admin role"
+          "OperatorableCallerNotAdmin()"
         );
       });
       it("revert admin pass zero addr for new contract", async () => {
         await expectRevert(
           this.traderOperatorable.setTraderOperatorsContract(ZERO_ADDRESS, { from: admin }),
-          "TraderOperatorable: address of new traderOperators contract can not be zero"
+          "TraderOperatorableNewTraderOperatorsAddressZero()"
         );
       });
       it("revert traderOperators confirm for zero address", async () => {
         await expectRevert(
           this.traderOperatorable.setTraderOperatorsContract(ZERO_ADDRESS, { from: admin }),
-          "TraderOperatorable: address of new traderOperators contract can not be zero"
+          "TraderOperatorableNewTraderOperatorsAddressZero()"
         );
       });
     });
@@ -74,10 +71,7 @@ contract("TraderOperatorable", ([owner, admin, operator, attacker]) => {
     context("two step logic for changing baseOperators contract address in TraderOperatorable instance", () => {
       describe("when pending contract not set", () => {
         it("revert confirm", async () => {
-          await expectRevert(
-            this.traderOperatorable.confirmTraderOperatorsContract({ from: admin }),
-            "TraderOperatorable: address of pending traderOperators contract can not be zero"
-          );
+          await expectRevert(this.traderOperatorable.confirmTraderOperatorsContract({ from: admin }), "TraderOperatorablePendingTraderOperatorsAddressZero()");
         });
       });
       describe("when pending contract set", () => {
@@ -87,16 +81,10 @@ contract("TraderOperatorable", ([owner, admin, operator, attacker]) => {
         });
         describe("non-functional", () => {
           it("revert caller not admin - he can not confirm (the second step)", async () => {
-            await expectRevert(
-              this.traderOperatorsNew.confirmFor(this.traderOperatorable.address, { from: attacker }),
-              "Operatorable: caller does not have the admin role"
-            );
+            await expectRevert(this.traderOperatorsNew.confirmFor(this.traderOperatorable.address, { from: attacker }), "OperatorableCallerNotAdmin()");
           });
           it("revert confirmation if caller is not pending traderOperators contract address", async () => {
-            await expectRevert(
-              this.traderOperatorable.confirmTraderOperatorsContract({ from: admin }),
-              "TraderOperatorable: should be called from new traderOperators contract"
-            );
+            await expectRevert(this.traderOperatorable.confirmTraderOperatorsContract({ from: admin }), "TraderOperatorableCallerNotNewTraderOperator()");
           });
 
           describe("broken contract address", () => {

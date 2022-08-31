@@ -1,4 +1,4 @@
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 // SPDX-License-Identifier: Unlicensed
 // https://github.com/rob-Hitchens/SetTypes/blob/master/contracts/Bytes32Set.sol

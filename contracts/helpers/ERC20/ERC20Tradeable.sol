@@ -1,10 +1,12 @@
+// SPDX-License-Identifier: UNLICENSED
+
 /**
  * @title ERC20Tradeable
  * @author Team 3301 <team3301@sygnum.com>
  * @dev Trader accounts can approve particular addresses on behalf of a user.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "./ERC20Overload/ERC20.sol";
 import "../../role/trader/TraderOperatorable.sol";

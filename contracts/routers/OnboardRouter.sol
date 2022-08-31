@@ -5,7 +5,7 @@
  *      the Sygnum platform, instead of having to initiate X amount of transactions.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "../helpers/interface/IWhitelist.sol";
 import "../role/base/Operatorable.sol";
@@ -19,6 +19,41 @@ contract OnboardRouter is Operatorable {
     IRaiseOperators internal raiseOperatorsInst;
     ITraderOperators internal traderOperatorsInst;
     IBlockerOperators internal blockerOperatorsInst;
+
+    /**
+     * @dev Error: "OnboardRouter: selected account does not have admin privileges"
+     */
+    error OnboardRouterAccountNotAdmin(address _account);
+
+    /**
+     * @dev Error: "OnboardRouter: selected account does not have operator privileges"
+     */
+    error OnboardRouterAccountNotOperator(address _account);
+
+    /**
+     * @dev Error: "OnboardRouter: address of new whitelist contract cannot be zero"
+     */
+    error OnboardRouterWhitelistContractAddressZero();
+
+    /**
+     * @dev Error: "OnboardRouter: address of new baseOperators contract cannot be zero"
+     */
+    error OnboardRouterBaseOperatorsContractAddressZero();
+
+    /**
+     * @dev Error: "OnboardRouter: address of new raiseOperators contract cannot be zero"
+     */
+    error OnboardRouterRaiseOperatorsContractAddressZero();
+
+    /**
+     * @dev Error: "OnboardRouter: address of new traderOperators contract cannot be zero"
+     */
+    error OnboardRouterTraderOperatorsContractAddressZero();
+
+    /**
+     * @dev Error: "OnboardRouter: address of new blockerOperators contract cannot be zero"
+     */
+    error OnboardRouterBlockerOperatorsContractAddressZero();
 
     event WhitelistContractChanged(address indexed caller, address indexed whitelistAddress);
     event BaseOperatorsContractChanged(address indexed caller, address indexed baseOperatorsAddress);
@@ -40,7 +75,7 @@ contract OnboardRouter is Operatorable {
         address _raiseOperators,
         address _traderOperators,
         address _blockerOperators
-    ) public initializer {
+    ) public virtual initializer {
         _setWhitelistContract(_whitelist);
         _setBaseOperatorsContract(_baseOperators);
         _setRaiseOperatorsContract(_raiseOperators);
@@ -167,7 +202,7 @@ contract OnboardRouter is Operatorable {
      * @param _whitelist Whitelist contract address.
      */
     function changeAdminToSuperAdmin(address _account, address _whitelist) public onlyAdmin {
-        require(isAdmin(_account), "OnboardRouter: selected account does not have admin privileges");
+        if (!isAdmin(_account)) revert OnboardRouterAccountNotAdmin(_account);
 
         _toggleWhitelist(_account, _whitelist, true);
         operatorsInst.addOperator(_account);
@@ -191,7 +226,7 @@ contract OnboardRouter is Operatorable {
      * @param _whitelist Whitelist contract address.
      */
     function changeOperatorToSuperAdmin(address _account, address _whitelist) public onlyAdmin {
-        require(isOperator(_account), "OnboardRouter: selected account does not have operator privileges");
+        if (!isOperator(_account)) revert OnboardRouterAccountNotOperator(_account);
 
         _toggleWhitelist(_account, _whitelist, true);
         operatorsInst.addAdmin(_account);
@@ -226,7 +261,8 @@ contract OnboardRouter is Operatorable {
      * @param _whitelist Whitelist contract address.
      */
     function changeSuperAdminToAdmin(address _account, address _whitelist) public onlyAdmin {
-        require(isAdmin(_account), "OnboardRouter: account is not admin");
+        if (!isAdmin(_account)) revert OnboardRouterAccountNotAdmin(_account);
+
         _toggleWhitelist(_account, _whitelist, false);
         operatorsInst.removeOperator(_account);
         traderOperatorsInst.removeTrader(_account);
@@ -238,7 +274,8 @@ contract OnboardRouter is Operatorable {
      * @param _whitelist Whitelist contract address.
      */
     function changeSuperAdminToOperator(address _account, address _whitelist) public onlyAdmin {
-        require(isAdmin(_account), "OnboardRouter: account is not admin");
+        if (!isAdmin(_account)) revert OnboardRouterAccountNotAdmin(_account);
+
         _toggleWhitelist(_account, _whitelist, false);
         operatorsInst.removeAdmin(_account);
         traderOperatorsInst.removeTrader(_account);
@@ -340,37 +377,36 @@ contract OnboardRouter is Operatorable {
     }
 
     function _setWhitelistContract(address _whitelist) internal {
-        require(_whitelist != address(0), "OnboardRouter: address of new whitelist contract cannot be zero");
+        if (_whitelist == address(0)) revert OnboardRouterWhitelistContractAddressZero();
+
         whitelistInst = IWhitelist(_whitelist);
         emit WhitelistContractChanged(msg.sender, _whitelist);
     }
 
     function _setBaseOperatorsContract(address _baseOperators) internal {
-        require(_baseOperators != address(0), "OnboardRouter: address of new baseOperators contract cannot be zero");
+        if (_baseOperators == address(0)) revert OnboardRouterBaseOperatorsContractAddressZero();
+
         operatorsInst = IBaseOperators(_baseOperators);
         emit BaseOperatorsContractChanged(msg.sender, _baseOperators);
     }
 
     function _setRaiseOperatorsContract(address _raiseOperators) internal {
-        require(_raiseOperators != address(0), "OnboardRouter: address of new raiseOperators contract cannot be zero");
+        if (_raiseOperators == address(0)) revert OnboardRouterRaiseOperatorsContractAddressZero();
+
         raiseOperatorsInst = IRaiseOperators(_raiseOperators);
         emit RaiseOperatorsContractChanged(msg.sender, _raiseOperators);
     }
 
     function _setTraderOperatorsContract(address _traderOperators) internal {
-        require(
-            _traderOperators != address(0),
-            "OnboardRouter: address of new traderOperators contract cannot be zero"
-        );
+        if (_traderOperators == address(0)) revert OnboardRouterTraderOperatorsContractAddressZero();
+
         traderOperatorsInst = ITraderOperators(_traderOperators);
         emit TraderOperatorsContractChanged(msg.sender, _traderOperators);
     }
 
     function _setBlockerOperatorsContract(address _blockerOperators) internal {
-        require(
-            _blockerOperators != address(0),
-            "OnboardRouter: address of new blockerOperators contract cannot be zero"
-        );
+        if (_blockerOperators == address(0)) revert OnboardRouterBlockerOperatorsContractAddressZero();
+
         blockerOperatorsInst = IBlockerOperators(_blockerOperators);
         emit BlockerOperatorsContractChanged(msg.sender, _blockerOperators);
     }

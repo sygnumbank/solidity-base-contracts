@@ -5,7 +5,7 @@
  *      contracts.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "../interface/IBlockerOperators.sol";
 import "../base/Operatorable.sol";
@@ -15,6 +15,31 @@ contract BlockerOperatorable is Operatorable {
     IBlockerOperators internal blockerOperatorsInst;
     address private blockerOperatorsPending;
 
+    /**
+     * @dev Error: "BlockerOperatorable: caller is not blocker role"
+     */
+    error BlockerOperatorableCallerNotBlocker();
+
+    /**
+     * @dev Error: "BlockerOperatorable: caller is not blocker or operator role"
+     */
+    error BlockerOperatorableCallerNotBlockerOrOperator();
+
+    /**
+     * @dev Error: "BlockerOperatorable: address of new blockerOperators contract can not be zero."
+     */
+    error BlockerOperatorableNewBlockerOperatorsAddressZero();
+
+    /**
+     * @dev Error: "BlockerOperatorable: address of pending blockerOperators contract can not be zero"
+     */
+    error BlockerOperatorablePendingBlockerOperatorsAddressZero();
+
+    /**
+     * @dev Error: "BlockerOperatorable: should be called from new blockerOperators contract"
+     */
+    error BlockerOperatorableCallerNotNewBlockerOperator();
+
     event BlockerOperatorsContractChanged(address indexed caller, address indexed blockerOperatorAddress);
     event BlockerOperatorsContractPending(address indexed caller, address indexed blockerOperatorAddress);
 
@@ -22,7 +47,7 @@ contract BlockerOperatorable is Operatorable {
      * @dev Reverts if sender does not have the blocker role associated.
      */
     modifier onlyBlocker() {
-        require(isBlocker(msg.sender), "BlockerOperatorable: caller is not blocker role");
+        if (!isBlocker(msg.sender)) revert BlockerOperatorableCallerNotBlocker();
         _;
     }
 
@@ -30,10 +55,7 @@ contract BlockerOperatorable is Operatorable {
      * @dev Reverts if sender does not have the blocker or operator role associated.
      */
     modifier onlyBlockerOrOperator() {
-        require(
-            isBlocker(msg.sender) || isOperator(msg.sender),
-            "BlockerOperatorable: caller is not blocker or operator role"
-        );
+        if (!isBlocker(msg.sender) && !isOperator(msg.sender)) revert BlockerOperatorableCallerNotBlockerOrOperator();
         _;
     }
 
@@ -43,7 +65,7 @@ contract BlockerOperatorable is Operatorable {
      * @param _baseOperators BaseOperators contract address.
      * @param _blockerOperators BlockerOperators contract address.
      */
-    function initialize(address _baseOperators, address _blockerOperators) public initializer {
+    function initialize(address _baseOperators, address _blockerOperators) public virtual initializer {
         super.initialize(_baseOperators);
         _setBlockerOperatorsContract(_blockerOperators);
     }
@@ -55,10 +77,8 @@ contract BlockerOperatorable is Operatorable {
      * @param _blockerOperators BlockerOperators contract address.
      */
     function setBlockerOperatorsContract(address _blockerOperators) public onlyAdmin {
-        require(
-            _blockerOperators != address(0),
-            "BlockerOperatorable: address of new blockerOperators contract can not be zero."
-        );
+        if (_blockerOperators == address(0)) revert BlockerOperatorableNewBlockerOperatorsAddressZero();
+
         blockerOperatorsPending = _blockerOperators;
         emit BlockerOperatorsContractPending(msg.sender, _blockerOperators);
     }
@@ -68,14 +88,9 @@ contract BlockerOperatorable is Operatorable {
      *       is the real contract address.
      */
     function confirmBlockerOperatorsContract() public {
-        require(
-            blockerOperatorsPending != address(0),
-            "BlockerOperatorable: address of pending blockerOperators contract can not be zero"
-        );
-        require(
-            msg.sender == blockerOperatorsPending,
-            "BlockerOperatorable: should be called from new blockerOperators contract"
-        );
+        if (blockerOperatorsPending == address(0)) revert BlockerOperatorablePendingBlockerOperatorsAddressZero();
+        if (msg.sender != blockerOperatorsPending) revert BlockerOperatorableCallerNotNewBlockerOperator();
+
         _setBlockerOperatorsContract(blockerOperatorsPending);
     }
 
@@ -102,10 +117,8 @@ contract BlockerOperatorable is Operatorable {
 
     /** INTERNAL FUNCTIONS */
     function _setBlockerOperatorsContract(address _blockerOperators) internal {
-        require(
-            _blockerOperators != address(0),
-            "BlockerOperatorable: address of new blockerOperators contract can not be zero"
-        );
+        if (_blockerOperators == address(0)) revert BlockerOperatorableNewBlockerOperatorsAddressZero();
+
         blockerOperatorsInst = IBlockerOperators(_blockerOperators);
         emit BlockerOperatorsContractChanged(msg.sender, _blockerOperators);
     }

@@ -5,7 +5,7 @@
  *      This contract is excluded from the audit.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "../../helpers/Initializable.sol";
 
@@ -16,14 +16,14 @@ contract InitializableMock is Initializable {
     /**
      * @dev Simulated initialization action.
      */
-    function initialize() public initializer {
+    function initialize() public virtual initializer {
         initializerRan = true;
     }
 
     /**
      * @dev Simulated nested initialization.
      */
-    function initializeNested() public initializer {
+    function initializeNested() public virtual initializer {
         initialize();
     }
 }

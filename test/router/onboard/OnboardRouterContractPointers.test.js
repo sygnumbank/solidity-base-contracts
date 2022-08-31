@@ -59,14 +59,11 @@ contract("OnboardRouterContractPointers", ([admin, operator, system, relay, atta
                 it("revert from attacker", async () => {
                   await expectRevert(
                     this.onboardRouter.changeWhitelistContract(this.whitelistNonDefault.address, { from: attacker }),
-                    "Operatorable: caller does not have the admin role"
+                    "OperatorableCallerNotAdmin()"
                   );
                 });
                 it("revert empty address", async () => {
-                  await expectRevert(
-                    this.onboardRouter.changeWhitelistContract(ZERO_ADDRESS, { from: admin }),
-                    "OnboardRouter: address of new whitelist contract cannot be zero"
-                  );
+                  await expectRevert(this.onboardRouter.changeWhitelistContract(ZERO_ADDRESS, { from: admin }), "OnboardRouterWhitelistContractAddressZero()");
                 });
               });
               describe("functional", () => {
@@ -87,13 +84,13 @@ contract("OnboardRouterContractPointers", ([admin, operator, system, relay, atta
               it("revert from attacker", async () => {
                 await expectRevert(
                   this.onboardRouter.changeBaseOperatorsContract(this.baseOperatorsNonDefault.address, { from: attacker }),
-                  "Operatorable: caller does not have the admin role"
+                  "OperatorableCallerNotAdmin()"
                 );
               });
               it("revert empty address", async () => {
                 await expectRevert(
                   this.onboardRouter.changeBaseOperatorsContract(ZERO_ADDRESS, { from: admin }),
-                  "OnboardRouter: address of new baseOperators contract cannot be zero"
+                  "OnboardRouterBaseOperatorsContractAddressZero()"
                 );
               });
             });
@@ -114,13 +111,13 @@ contract("OnboardRouterContractPointers", ([admin, operator, system, relay, atta
               it("revert from attacker", async () => {
                 await expectRevert(
                   this.onboardRouter.changeRaiseOperatorsContract(this.raiseOperatorsNonDefault.address, { from: attacker }),
-                  "Operatorable: caller does not have the admin role"
+                  "OperatorableCallerNotAdmin()"
                 );
               });
               it("revert empty address", async () => {
                 await expectRevert(
                   this.onboardRouter.changeRaiseOperatorsContract(ZERO_ADDRESS, { from: admin }),
-                  "OnboardRouter: address of new raiseOperators contract cannot be zero"
+                  "OnboardRouterRaiseOperatorsContractAddressZero()"
                 );
               });
             });
@@ -141,13 +138,13 @@ contract("OnboardRouterContractPointers", ([admin, operator, system, relay, atta
               it("revert from attacker", async () => {
                 await expectRevert(
                   this.onboardRouter.changeTraderOperatorsContract(this.traderOperatorsNonDefault.address, { from: attacker }),
-                  "Operatorable: caller does not have the admin role"
+                  "OperatorableCallerNotAdmin()"
                 );
               });
               it("revert empty address", async () => {
                 await expectRevert(
                   this.onboardRouter.changeTraderOperatorsContract(ZERO_ADDRESS, { from: admin }),
-                  "OnboardRouter: address of new traderOperators contract cannot be zero"
+                  "OnboardRouterTraderOperatorsContractAddressZero()"
                 );
               });
             });
@@ -168,13 +165,13 @@ contract("OnboardRouterContractPointers", ([admin, operator, system, relay, atta
               it("revert from attacker", async () => {
                 await expectRevert(
                   this.onboardRouter.changeBlockerOperatorsContract(this.blockerOperatorsNonDefault.address, { from: attacker }),
-                  "Operatorable: caller does not have the admin role"
+                  "OperatorableCallerNotAdmin()"
                 );
               });
               it("revert empty address", async () => {
                 await expectRevert(
                   this.onboardRouter.changeBlockerOperatorsContract(ZERO_ADDRESS, { from: admin }),
-                  "OnboardRouter: address of new blockerOperators contract cannot be zero"
+                  "OnboardRouterBlockerOperatorsContractAddressZero()"
                 );
               });
             });

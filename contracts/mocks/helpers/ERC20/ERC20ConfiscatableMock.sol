@@ -5,12 +5,22 @@
  *      This contract is excluded from the audit.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "../../../helpers/ERC20/ERC20Confiscatable.sol";
 
 contract ERC20ConfiscatableMock is ERC20Confiscatable {
     uint256 constant BATCH_LIMIT = 256;
+
+    /**
+     * @dev Error: "ERC20ConfiscatableMock: confiscatees, recipients and values are not equal."
+     */
+    error ERC20ConfiscatableMockLengthsNotEqual();
+
+    /**
+     * @dev Error: "ERC20ConfiscatableMock: batch count is greater than BATCH_LIMIT."
+     */
+    error ERC20ConfiscatableMockBatchCountTooLarge(uint256 _batchCount);
 
     /**
      * @dev Access internal mint function.
@@ -45,13 +55,13 @@ contract ERC20ConfiscatableMock is ERC20Confiscatable {
         address[] memory _confiscatees,
         address[] memory _receivers,
         uint256[] memory _values
-    ) public returns (bool) {
-        require(
-            _confiscatees.length == _values.length && _receivers.length == _values.length,
-            "ERC20ConfiscatableMock: confiscatees, recipients and values are not equal."
-        );
-        require(_confiscatees.length < BATCH_LIMIT, "ERC20ConfiscatableMock: batch count is greater than BATCH_LIMIT.");
-        for (uint256 i = 0; i < _confiscatees.length; i++) {
+    ) public {
+        if (_confiscatees.length != _receivers.length || _confiscatees.length != _values.length)
+            revert ERC20ConfiscatableMockLengthsNotEqual();
+
+        if (_confiscatees.length > BATCH_LIMIT) revert ERC20ConfiscatableMockBatchCountTooLarge(_confiscatees.length);
+
+        for (uint256 i = 0; i < _confiscatees.length; ++i) {
             confiscate(_confiscatees[i], _receivers[i], _values[i]);
         }
     }

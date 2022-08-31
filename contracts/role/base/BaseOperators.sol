@@ -4,9 +4,9 @@
  * @dev For managing operators, admins, and system accounts.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
-import "openzeppelin-solidity/contracts/access/Roles.sol";
+import "../Roles.sol";
 import "./Operatorable.sol";
 
 contract BaseOperators {
@@ -17,6 +17,41 @@ contract BaseOperators {
     Roles.Role private _admins;
     Roles.Role private _systems;
     Roles.Role private _relays;
+
+    /**
+     * @dev Error: "BaseOperators: caller does not have the admin role"
+     */
+    error BaseOperatorsCallerNotAdmin();
+
+    /**
+     * @dev Error: "BaseOperators: caller does not have multisig role"
+     */
+    error BaseOperatorsCallerNotMultisig();
+
+    /**
+     * @dev Error: "BaseOperators: caller does not have the admin role nor relay"
+     */
+    error BaseOperatorsCallerNotAdminOrRelay();
+
+    /**
+     * @dev Error: "BaseOperators: address cannot be empty."
+     */
+    error BaseOperatorsZeroAddress();
+
+    /**
+     * @dev Error: "BaseOperators: admin can not remove himself"
+     */
+    error BaseOperatorsAdminRemoveSelf();
+
+    /**
+     * @dev Error: "BaseOperators: cannot assign new multisig when multisig already assigned"
+     */
+    error BaseOperatorsMultisigAlreadyAssigned();
+
+    /**
+     * @dev Error: "BaseOperators: multisig has to be contract"
+     */
+    error BaseOperatorsMultisigNotContract();
 
     event OperatorAdded(address indexed caller, address indexed account);
     event OperatorRemoved(address indexed caller, address indexed account);
@@ -32,7 +67,7 @@ contract BaseOperators {
      * @dev Reverts if caller does not have admin role associated.
      */
     modifier onlyAdmin() {
-        require(isAdmin(msg.sender), "BaseOperators: caller does not have the admin role");
+        if (!isAdmin(msg.sender)) revert BaseOperatorsCallerNotAdmin();
         _;
     }
 
@@ -40,7 +75,7 @@ contract BaseOperators {
      * @dev Reverts if caller does not have multisig privileges;
      */
     modifier onlyMultisig() {
-        require(isMultisig(msg.sender), "BaseOperators: caller does not have multisig role");
+        if (!isMultisig(msg.sender)) revert BaseOperatorsCallerNotMultisig();
         _;
     }
 
@@ -48,14 +83,11 @@ contract BaseOperators {
      * @dev Reverts if caller does not have admin or relay role associated.
      */
     modifier onlyAdminOrRelay() {
-        require(
-            isAdmin(msg.sender) || isRelay(msg.sender),
-            "BaseOperators: caller does not have the admin role nor relay"
-        );
+        if (!isAdmin(msg.sender) && !isRelay(msg.sender)) revert BaseOperatorsCallerNotAdminOrRelay();
         _;
     }
 
-    constructor(address _admin) public {
+    constructor(address _admin) {
         _addAdmin(_admin);
     }
 
@@ -64,7 +96,7 @@ contract BaseOperators {
      * @param _address Operatorable contract addres.
      */
     function confirmFor(address _address) public onlyAdmin {
-        require(_address != address(0), "BaseOperators: address cannot be empty.");
+        if (_address == address(0)) revert BaseOperatorsZeroAddress();
         Operatorable(_address).confirmOperatorsContract();
     }
 
@@ -111,7 +143,7 @@ contract BaseOperators {
      * @param _account address that should be revoked admin privileges.
      */
     function removeAdmin(address _account) public onlyAdminOrRelay {
-        require(_account != msg.sender, "BaseOperators: admin can not remove himself");
+        if (_account == msg.sender) revert BaseOperatorsAdminRemoveSelf();
         _removeAdmin(_account);
     }
 
@@ -187,7 +219,7 @@ contract BaseOperators {
      * @param _contract address that should be given multisig privileges.
      */
     function addMultisig(address _contract) public onlyAdmin {
-        require(_multisig == address(0), "BaseOperators: cannot assign new multisig when multisig already assigned");
+        if (_multisig != address(0)) revert BaseOperatorsMultisigAlreadyAssigned();
         _changeMultisig(_contract);
     }
 
@@ -213,7 +245,7 @@ contract BaseOperators {
      * @param _account address that should be revoked operator and admin privileges.
      */
     function removeOperatorAndAdmin(address _account) public onlyAdminOrRelay {
-        require(_account != msg.sender, "BaseOperators: admin can not remove himself");
+        if (_account == msg.sender) revert BaseOperatorsAdminRemoveSelf();
         _removeAdmin(_account);
         _removeOperator(_account);
     }
@@ -223,7 +255,7 @@ contract BaseOperators {
      * @param _account address that should be given operator and admin privileges.
      */
     function changeToOperator(address _account) public onlyAdmin {
-        require(_account != msg.sender, "BaseOperators: admin can not change himself");
+        if (_account == msg.sender) revert BaseOperatorsAdminRemoveSelf();
         _removeAdmin(_account);
         _addOperator(_account);
     }
@@ -279,14 +311,14 @@ contract BaseOperators {
     }
 
     function _changeMultisig(address _contract) internal {
-        require(_contract != address(0), "BaseOperators: new multisig cannot be empty");
+        if (_contract == address(0)) revert BaseOperatorsZeroAddress();
         if (isMultisig(msg.sender)) {
             uint32 size;
             // solhint-disable-next-line
             assembly {
                 size := extcodesize(_contract)
             }
-            require(size > 0, "BaseOperators: multisig has to be contract");
+            if (size == 0) revert BaseOperatorsMultisigNotContract();
         }
         _multisig = _contract;
         emit MultisigChanged(msg.sender, _contract);

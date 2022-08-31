@@ -8,7 +8,7 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
     this.operatorable = await Operatorable.new({ from: admin });
   });
   it("revert initialization with zero addr", async () => {
-    await expectRevert(this.operatorable.initialize(ZERO_ADDRESS), "Operatorable: address of new operators contract cannot be zero");
+    await expectRevert(this.operatorable.initialize(ZERO_ADDRESS), "OperatorableNewOperatorsZeroAddress()");
   });
 
   context("operatorable initialized", () => {
@@ -29,20 +29,20 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
         assert.equal(await this.operatorable.isInitialized(), true);
       });
       it("can not be initialized twice", async () => {
-        await expectRevert(this.operatorable.initialize(this.baseOperators.address), "Initializable: Contract instance has already been initialized");
+        await expectRevert(this.operatorable.initialize(this.baseOperators.address), "InitializableContractAlreadyInitialized()");
       });
     });
 
     context("managing admins", () => {
       describe("non-functional", () => {
         it("revert admin can not remove not existing admin", async () => {
-          await expectRevert(this.baseOperators.removeAdmin(admin2, { from: admin }), "Roles: account does not have role");
+          await expectRevert(this.baseOperators.removeAdmin(admin2, { from: admin }), `RolesAccountDoesNotHaveRole("${admin2}")`);
         });
         it("revert removing admin with zero addr", async () => {
-          await expectRevert(this.baseOperators.removeAdmin(ZERO_ADDRESS, { from: admin }), "Roles: account is the zero address");
+          await expectRevert(this.baseOperators.removeAdmin(ZERO_ADDRESS, { from: admin }), "RolesAccountIsZeroAddress()");
         });
         it("revert adding admin with zero addr", async () => {
-          await expectRevert(this.baseOperators.addAdmin(ZERO_ADDRESS, { from: admin }), "Roles: account is the zero address");
+          await expectRevert(this.baseOperators.addAdmin(ZERO_ADDRESS, { from: admin }), "RolesAccountIsZeroAddress()");
         });
       });
       describe("functional", () => {
@@ -77,7 +77,7 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
         });
         describe("non-functional", () => {
           it("revert admin remove themself", async () => {
-            await expectRevert(this.baseOperators.removeAdmin(admin, { from: admin }), "BaseOperators: admin can not remove himself");
+            await expectRevert(this.baseOperators.removeAdmin(admin, { from: admin }), "BaseOperatorsAdminRemoveSelf()");
           });
         });
         describe("functional", () => {
@@ -108,10 +108,10 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
     context("managing operators", () => {
       describe("non-functional", () => {
         it("revert removing operator with zero addr", async () => {
-          await expectRevert(this.baseOperators.removeOperator(ZERO_ADDRESS, { from: admin }), "Roles: account is the zero address");
+          await expectRevert(this.baseOperators.removeOperator(ZERO_ADDRESS, { from: admin }), "RolesAccountIsZeroAddress()");
         });
         it("revert adding operator with zero addr", async () => {
-          await expectRevert(this.baseOperators.addOperator(ZERO_ADDRESS, { from: admin }), "Roles: account is the zero address");
+          await expectRevert(this.baseOperators.addOperator(ZERO_ADDRESS, { from: admin }), "RolesAccountIsZeroAddress()");
         });
       });
       describe("functional", () => {
@@ -147,7 +147,7 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
         });
         describe("non-functional", () => {
           it("revert operator adding operator", async () => {
-            await expectRevert(this.baseOperators.addOperator(user, { from: operator }), "BaseOperators: caller does not have the admin role");
+            await expectRevert(this.baseOperators.addOperator(user, { from: operator }), "BaseOperatorsCallerNotAdminOrRelay()");
           });
         });
         describe("functional", () => {
@@ -183,13 +183,13 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
       describe("changeToOperator", () => {
         describe("non-functional", () => {
           it("revert caller attacker", async () => {
-            await expectRevert(this.baseOperators.changeToOperator(admin, { from: attacker }), "BaseOperators: caller does not have the admin role");
+            await expectRevert(this.baseOperators.changeToOperator(admin, { from: attacker }), "BaseOperatorsCallerNotAdmin()");
           });
           it("revert admin caller cannot change themselves", async () => {
-            await expectRevert(this.baseOperators.changeToOperator(admin, { from: admin }), "BaseOperators: admin can not change himself");
+            await expectRevert(this.baseOperators.changeToOperator(admin, { from: admin }), "BaseOperatorsAdminRemoveSelf()");
           });
           it("revert account change not admin", async () => {
-            await expectRevert(this.baseOperators.changeToOperator(operator, { from: admin }), "Roles: account does not have role");
+            await expectRevert(this.baseOperators.changeToOperator(operator, { from: admin }), `RolesAccountDoesNotHaveRole("${operator}")`);
           });
           describe("operator and admin active", () => {
             beforeEach(async () => {
@@ -200,7 +200,7 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
             });
             describe("non-functional", () => {
               it("revert add super admin if already operator & admin", async () => {
-                await expectRevert(this.baseOperators.changeToOperator(admin2, { from: admin }), "Roles: account already has role");
+                await expectRevert(this.baseOperators.changeToOperator(admin2, { from: admin }), `RolesAccountAlreadyHasRole("${admin2}")`);
               });
             });
           });
@@ -220,16 +220,16 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
       describe("changeToAdmin", () => {
         describe("non-functional", () => {
           it("revert caller not admin", async () => {
-            await expectRevert(this.baseOperators.changeToAdmin(admin, { from: operator }), "BaseOperators: caller does not have the admin role");
+            await expectRevert(this.baseOperators.changeToAdmin(admin, { from: operator }), `BaseOperatorsCallerNotAdmin()`);
           });
           it("revert admin caller cannot change themselves", async () => {
-            await expectRevert(this.baseOperators.changeToAdmin(admin, { from: admin }), "Roles: account already has role");
+            await expectRevert(this.baseOperators.changeToAdmin(admin, { from: admin }), `RolesAccountAlreadyHasRole("${admin}")`);
           });
           it("revert admin already", async () => {
-            await expectRevert(this.baseOperators.changeToAdmin(admin2, { from: admin }), "Roles: account already has role");
+            await expectRevert(this.baseOperators.changeToAdmin(admin2, { from: admin }), `RolesAccountAlreadyHasRole("${admin2}")`);
           });
           it("revert operator not assigned", async () => {
-            await expectRevert(this.baseOperators.changeToAdmin(random, { from: admin }), "Roles: account does not have role");
+            await expectRevert(this.baseOperators.changeToAdmin(random, { from: admin }), `RolesAccountDoesNotHaveRole("${random}")`);
           });
           describe("super admin active", () => {
             beforeEach(async () => {
@@ -237,7 +237,7 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
               assert.equal(await this.baseOperators.isAdmin(operator), true);
             });
             it("revert add super admin if already super admin", async () => {
-              await expectRevert(this.baseOperators.changeToOperator(operator, { from: admin }), "Roles: account already has role");
+              await expectRevert(this.baseOperators.changeToOperator(operator, { from: admin }), `RolesAccountAlreadyHasRole("${operator}")`);
             });
           });
         });
@@ -256,13 +256,13 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
       describe("addOperatorAndAdmin", () => {
         describe("non-functional", () => {
           it("revert caller not admin/relay", async () => {
-            await expectRevert(this.baseOperators.addOperatorAndAdmin(random, { from: attacker }), "BaseOperators: caller does not have the admin role");
+            await expectRevert(this.baseOperators.addOperatorAndAdmin(random, { from: attacker }), "BaseOperatorsCallerNotAdminOrRelay()");
           });
           it("revert account already has admin role", async () => {
-            await expectRevert(this.baseOperators.addOperatorAndAdmin(admin2, { from: admin }), "Roles: account already has role");
+            await expectRevert(this.baseOperators.addOperatorAndAdmin(admin2, { from: admin }), `RolesAccountAlreadyHasRole("${admin2}")`);
           });
           it("revert account already has operator role", async () => {
-            await expectRevert(this.baseOperators.addOperatorAndAdmin(operator, { from: admin }), "Roles: account already has role");
+            await expectRevert(this.baseOperators.addOperatorAndAdmin(operator, { from: admin }), `RolesAccountAlreadyHasRole("${operator}")`);
           });
         });
         describe("functional", () => {
@@ -304,16 +304,16 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
       describe("removeOperatorAndAdmin", () => {
         describe("non-functional", () => {
           it("revert caller not admin", async () => {
-            await expectRevert(this.baseOperators.removeOperatorAndAdmin(admin, { from: operator }), "BaseOperators: caller does not have the admin role");
+            await expectRevert(this.baseOperators.removeOperatorAndAdmin(admin, { from: operator }), "BaseOperatorsCallerNotAdminOrRelay()");
           });
           it("revert caller same as account removal", async () => {
-            await expectRevert(this.baseOperators.removeOperatorAndAdmin(admin, { from: admin }), "BaseOperators: admin can not remove himself");
+            await expectRevert(this.baseOperators.removeOperatorAndAdmin(admin, { from: admin }), "BaseOperatorsAdminRemoveSelf()");
           });
           it("revert account does not have admin role", async () => {
-            await expectRevert(this.baseOperators.removeOperatorAndAdmin(operator, { from: admin }), "Roles: account does not have role");
+            await expectRevert(this.baseOperators.removeOperatorAndAdmin(operator, { from: admin }), `RolesAccountDoesNotHaveRole("${operator}")`);
           });
           it("revert account does not have operator role", async () => {
-            await expectRevert(this.baseOperators.removeOperatorAndAdmin(admin2, { from: admin }), "Roles: account does not have role");
+            await expectRevert(this.baseOperators.removeOperatorAndAdmin(admin2, { from: admin }), `RolesAccountDoesNotHaveRole("${admin2}")`);
           });
         });
         describe("functional", () => {
@@ -356,13 +356,13 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
       });
       describe("non-functional", () => {
         it("revert admin removing non-existing system", async () => {
-          await expectRevert(this.baseOperators.removeSystem(system, { from: admin }), "Roles: account does not have role");
+          await expectRevert(this.baseOperators.removeSystem(system, { from: admin }), `RolesAccountDoesNotHaveRole("${system}")`);
         });
         it("revert removing system with zero addr", async () => {
-          await expectRevert(this.baseOperators.removeSystem(ZERO_ADDRESS, { from: admin }), "Roles: account is the zero address");
+          await expectRevert(this.baseOperators.removeSystem(ZERO_ADDRESS, { from: admin }), "RolesAccountIsZeroAddress()");
         });
         it("revert adding system with zero addr", async () => {
-          await expectRevert(this.baseOperators.addSystem(ZERO_ADDRESS, { from: admin }), "Roles: account is the zero address");
+          await expectRevert(this.baseOperators.addSystem(ZERO_ADDRESS, { from: admin }), "RolesAccountIsZeroAddress()");
         });
       });
       describe("functional", () => {
@@ -394,13 +394,13 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
         });
         describe("non-functional", () => {
           it("revert system adding system", async () => {
-            await expectRevert(this.baseOperators.addSystem(user, { from: system }), "BaseOperators: caller does not have the admin role");
+            await expectRevert(this.baseOperators.addSystem(user, { from: system }), "BaseOperatorsCallerNotAdminOrRelay()");
           });
           it("revert system removing another system", async () => {
-            await expectRevert(this.baseOperators.removeSystem(system2, { from: system }), "BaseOperators: caller does not have the admin role");
+            await expectRevert(this.baseOperators.removeSystem(system2, { from: system }), "BaseOperatorsCallerNotAdminOrRelay()");
           });
           it("revert system removing themself", async () => {
-            await expectRevert(this.baseOperators.removeSystem(system, { from: system }), "BaseOperators: caller does not have the admin role");
+            await expectRevert(this.baseOperators.removeSystem(system, { from: system }), "BaseOperatorsCallerNotAdminOrRelay()");
           });
         });
         describe("functional", () => {
@@ -430,13 +430,13 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
     context("managing relay contract addresses", () => {
       describe("non-functional", () => {
         it("revert admin removing non-existing relay", async () => {
-          await expectRevert(this.baseOperators.removeRelay(relay, { from: admin }), "Roles: account does not have role");
+          await expectRevert(this.baseOperators.removeRelay(relay, { from: admin }), `RolesAccountDoesNotHaveRole("${relay}")`);
         });
         it("revert removing relay with zero addr", async () => {
-          await expectRevert(this.baseOperators.removeRelay(ZERO_ADDRESS, { from: admin }), "Roles: account is the zero address");
+          await expectRevert(this.baseOperators.removeRelay(ZERO_ADDRESS, { from: admin }), "RolesAccountIsZeroAddress()");
         });
         it("revert adding relay with zero addr", async () => {
-          await expectRevert(this.baseOperators.addRelay(ZERO_ADDRESS, { from: admin }), "Roles: account is the zero address");
+          await expectRevert(this.baseOperators.addRelay(ZERO_ADDRESS, { from: admin }), "RolesAccountIsZeroAddress()");
         });
       });
       describe("functional", () => {
@@ -456,13 +456,13 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
         });
         describe("non-functional", () => {
           it("revert relay adding relay", async () => {
-            await expectRevert(this.baseOperators.addRelay(user, { from: relay }), "BaseOperators: caller does not have the admin role");
+            await expectRevert(this.baseOperators.addRelay(user, { from: relay }), "BaseOperatorsCallerNotAdmin()");
           });
           it("revert relay removing another relay", async () => {
-            await expectRevert(this.baseOperators.removeRelay(relay2, { from: relay }), "BaseOperators: caller does not have the admin role");
+            await expectRevert(this.baseOperators.removeRelay(relay2, { from: relay }), "BaseOperatorsCallerNotAdmin()");
           });
           it("revert relay removing themself", async () => {
-            await expectRevert(this.baseOperators.removeRelay(relay, { from: relay }), "BaseOperators: caller does not have the admin role");
+            await expectRevert(this.baseOperators.removeRelay(relay, { from: relay }), "BaseOperatorsCallerNotAdmin()");
           });
         });
         describe("functional", () => {
@@ -480,7 +480,7 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
     context("managing multisig contract addresses", () => {
       describe("non-functional", () => {
         it("revert adding relay with zero addr", async () => {
-          await expectRevert(this.baseOperators.addMultisig(ZERO_ADDRESS, { from: admin }), "BaseOperators: new multisig cannot be empty");
+          await expectRevert(this.baseOperators.addMultisig(ZERO_ADDRESS, { from: admin }), "BaseOperatorsZeroAddress()");
         });
       });
       describe("functional", () => {
@@ -503,22 +503,19 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
           describe("non-functional", () => {
             describe("add multisig", () => {
               it("revert when multisig already assigned", async () => {
-                await expectRevert(
-                  this.baseOperators.addMultisig(multisig2, { from: admin }),
-                  "BaseOperators: cannot assign new multisig when multisig already assigned"
-                );
+                await expectRevert(this.baseOperators.addMultisig(multisig2, { from: admin }), "BaseOperatorsMultisigAlreadyAssigned()");
               });
             });
             describe("change multisig", () => {
               it("revert when caller is not multisig", async () => {
-                await expectRevert(this.baseOperators.changeMultisig(multisig2, { from: admin }), "BaseOperators: caller does not have multisig role");
+                await expectRevert(this.baseOperators.changeMultisig(multisig2, { from: admin }), "BaseOperatorsCallerNotMultisig()");
               });
               it("revert empty address change from multisig", async () => {
-                await expectRevert(this.baseOperators.changeMultisig(ZERO_ADDRESS, { from: multisig }), "BaseOperators: new multisig cannot be empty");
+                await expectRevert(this.baseOperators.changeMultisig(ZERO_ADDRESS, { from: multisig }), "BaseOperatorsZeroAddress()");
               });
               describe("if admin first multisig, cannot send a non-contract to be new multisig", () => {
                 it("revert non-contract change", async () => {
-                  await expectRevert(this.baseOperators.changeMultisig(multisig2, { from: multisig }), "BaseOperators: multisig has to be contract");
+                  await expectRevert(this.baseOperators.changeMultisig(multisig2, { from: multisig }), "BaseOperatorsMultisigNotContract()");
                 });
               });
             });
@@ -532,19 +529,13 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
       });
       describe("non-functional", () => {
         it("revert attacker init changing", async () => {
-          await expectRevert(
-            this.operatorable.setOperatorsContract(this.baseOperatorsNew.address, { from: attacker }),
-            "Operatorable: caller does not have the admin role"
-          );
+          await expectRevert(this.operatorable.setOperatorsContract(this.baseOperatorsNew.address, { from: attacker }), "OperatorableCallerNotAdmin()");
         });
         it("revert admin pass zero addr for new contract", async () => {
-          await expectRevert(
-            this.operatorable.setOperatorsContract(ZERO_ADDRESS, { from: admin }),
-            "Operatorable: address of new operators contract can not be zero"
-          );
+          await expectRevert(this.operatorable.setOperatorsContract(ZERO_ADDRESS, { from: admin }), "OperatorableNewOperatorsZeroAddress()");
         });
         it("revert baseOperators confirm for zero address", async () => {
-          await expectRevert(this.operatorable.confirmOperatorsContract({ from: admin }), "Operatorable: address of new operators contract can not be zero");
+          await expectRevert(this.operatorable.confirmOperatorsContract({ from: admin }), "OperatorableNewOperatorsZeroAddress()");
         });
         it("revert admin finish second step passing broken contract address", async () => {
           // this.baseOperatorsNew = await BaseOperators.new(random, { from:owner })
@@ -561,16 +552,13 @@ contract("Operatorable", ([owner, admin, admin2, operator, operator2, system, sy
         });
         describe("non-functional", () => {
           it("revert caller attacker", async () => {
-            await expectRevert(
-              this.baseOperatorsNew.confirmFor(this.operatorable.address, { from: attacker }),
-              "BaseOperators: caller does not have the admin role"
-            );
+            await expectRevert(this.baseOperatorsNew.confirmFor(this.operatorable.address, { from: attacker }), "BaseOperatorsCallerNotAdmin()");
           });
           it("revert confirmation for zero addr", async () => {
-            await expectRevert(this.baseOperatorsNew.confirmFor(ZERO_ADDRESS, { from: admin }), "BaseOperators: address cannot be empty");
+            await expectRevert(this.baseOperatorsNew.confirmFor(ZERO_ADDRESS, { from: admin }), "BaseOperatorsZeroAddress()");
           });
           it("revert confirmation if caller is not pending baseOperators contract address", async () => {
-            await expectRevert(this.operatorable.confirmOperatorsContract({ from: admin }), "Operatorable: should be called from new operators contract");
+            await expectRevert(this.operatorable.confirmOperatorsContract({ from: admin }), `OperatorableCallerNotOperatorsContract("${admin}")`);
           });
         });
         describe("functional", () => {

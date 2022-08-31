@@ -12,7 +12,7 @@ contract("BlockerOperators", ([admin, operator, blocker, relay, attacker]) => {
 
   context("contract initialization", () => {
     it("revert blockerOperators initialization with zero address", async () => {
-      await expectRevert(this.blockerOperators.initialize(ZERO_ADDRESS, { from: operator }), "Operatorable: address of new operators contract cannot be zero");
+      await expectRevert(this.blockerOperators.initialize(ZERO_ADDRESS, { from: operator }), "OperatorableNewOperatorsZeroAddress()");
     });
   });
 
@@ -25,25 +25,25 @@ contract("BlockerOperators", ([admin, operator, blocker, relay, attacker]) => {
     describe("non-functional", () => {
       describe("from operator", () => {
         it("revert removing non-existing blocker", async () => {
-          await expectRevert(this.blockerOperators.removeBlocker(blocker, { from: operator }), "Roles: account does not have role");
+          await expectRevert(this.blockerOperators.removeBlocker(blocker, { from: operator }), `RolesAccountDoesNotHaveRole("${blocker}")`);
         });
         it("revert removing blocker with zero addr", async () => {
-          await expectRevert(this.blockerOperators.removeBlocker(ZERO_ADDRESS, { from: operator }), "Roles: account is the zero address");
+          await expectRevert(this.blockerOperators.removeBlocker(ZERO_ADDRESS, { from: operator }), "RolesAccountIsZeroAddress()");
         });
         it("revert adding blocker with zero addr", async () => {
-          await expectRevert(this.blockerOperators.addBlocker(ZERO_ADDRESS, { from: operator }), "Roles: account is the zero address");
+          await expectRevert(this.blockerOperators.addBlocker(ZERO_ADDRESS, { from: operator }), "RolesAccountIsZeroAddress()");
         });
       });
       describe("from attacker", () => {
         it("revert adding blocker", async () => {
-          await expectRevert(this.blockerOperators.addBlocker(blocker, { from: attacker }), "Operatorable: caller does not have the operator role");
+          await expectRevert(this.blockerOperators.addBlocker(blocker, { from: attacker }), "OperatorableCallerNotOperatorOrAdminOrRelay()");
         });
         describe("revert removing blocker", () => {
           beforeEach(async () => {
             await this.blockerOperators.addBlocker(blocker, { from: operator });
           });
           it("reverts", async () => {
-            await expectRevert(this.blockerOperators.removeBlocker(blocker, { from: attacker }), "Operatorable: caller does not have the operator role");
+            await expectRevert(this.blockerOperators.removeBlocker(blocker, { from: attacker }), "OperatorableCallerNotOperatorOrAdminOrRelay()");
           });
         });
       });
@@ -61,7 +61,7 @@ contract("BlockerOperators", ([admin, operator, blocker, relay, attacker]) => {
             beforeEach(async () => {
               await this.blockerOperators.removeBlocker(blocker, { from: operator });
             });
-            it("sucesfully removed", async () => {
+            it("succesfully removed", async () => {
               assert.equal(await this.blockerOperators.isBlocker(blocker), false);
             });
           });
@@ -79,7 +79,25 @@ contract("BlockerOperators", ([admin, operator, blocker, relay, attacker]) => {
             beforeEach(async () => {
               await this.blockerOperators.removeBlocker(blocker, { from: relay });
             });
-            it("sucesfully removed", async () => {
+            it("succesfully removed", async () => {
+              assert.equal(await this.blockerOperators.isBlocker(blocker), false);
+            });
+          });
+        });
+      });
+      describe("from admin", () => {
+        describe("can add blocker", () => {
+          beforeEach(async () => {
+            await this.blockerOperators.addBlocker(blocker, { from: admin });
+          });
+          it("succesfully added", async () => {
+            assert.equal(await this.blockerOperators.isBlocker(blocker), true);
+          });
+          describe("can remove blocker", () => {
+            beforeEach(async () => {
+              await this.blockerOperators.removeBlocker(blocker, { from: admin });
+            });
+            it("succesfully removed", async () => {
               assert.equal(await this.blockerOperators.isBlocker(blocker), false);
             });
           });

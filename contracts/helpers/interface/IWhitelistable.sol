@@ -1,9 +1,11 @@
-pragma solidity 0.5.12;
+// SPDX-License-Identifier: UNLICENSED
+
+pragma solidity ^0.8.0;
 
 /**
  * @title IWhitelistable
  * @notice Interface for whitelistable contract.
  */
-contract IWhitelistable {
-    function confirmWhitelistContract() external;
+abstract contract IWhitelistable {
+    function confirmWhitelistContract() external virtual;
 }

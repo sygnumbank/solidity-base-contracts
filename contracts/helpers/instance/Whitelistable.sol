@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: UNLICENSED
+
 /**
  * @title Whitelistable
  * @author Team 3301 <team3301@sygnum.com>
@@ -5,7 +7,7 @@
  *       contracts.
  */
 
-pragma solidity 0.5.12;
+pragma solidity ^0.8.0;
 
 import "../../role/base/Operatorable.sol";
 import "../interface/IWhitelist.sol";
@@ -15,6 +17,21 @@ contract Whitelistable is Initializable, Operatorable {
     IWhitelist internal whitelistInst;
     address private whitelistPending;
 
+    /**
+     * @dev Error: "Whitelistable: account is not whitelisted"
+     */
+    error WhitelistableAccountNotWhitelisted();
+
+    /**
+     * @dev Error: "Whitelistable: address of new whitelist contract can not be zero"
+     */
+    error WhitelistableWhitelistContractZeroAddress();
+
+    /**
+     * @dev Error:  "Whitelistable: should be called from new whitelist contract"
+     */
+    error WhitelistableCallerNotWhitelistContract(address _caller);
+
     event WhitelistContractChanged(address indexed caller, address indexed whitelistAddress);
     event WhitelistContractPending(address indexed caller, address indexed whitelistAddress);
 
@@ -23,7 +40,7 @@ contract Whitelistable is Initializable, Operatorable {
      * @param _account address to determine if whitelisted.
      */
     modifier whenWhitelisted(address _account) {
-        require(isWhitelisted(_account), "Whitelistable: account is not whitelisted");
+        if (!isWhitelisted(_account)) revert WhitelistableAccountNotWhitelisted();
         _;
     }
 
@@ -33,7 +50,7 @@ contract Whitelistable is Initializable, Operatorable {
      * @param _whitelist Whitelist contract address.
      * @param _baseOperators BaseOperators contract address.
      */
-    function initialize(address _baseOperators, address _whitelist) public initializer {
+    function initialize(address _baseOperators, address _whitelist) public virtual initializer {
         _setOperatorsContract(_baseOperators);
         _setWhitelistContract(_whitelist);
     }
@@ -45,7 +62,8 @@ contract Whitelistable is Initializable, Operatorable {
      * @param _whitelist Whitelist contract address.
      */
     function setWhitelistContract(address _whitelist) public onlyAdmin {
-        require(_whitelist != address(0), "Whitelistable: address of new whitelist contract can not be zero");
+        if (_whitelist == address(0)) revert WhitelistableWhitelistContractZeroAddress();
+
         whitelistPending = _whitelist;
         emit WhitelistContractPending(msg.sender, _whitelist);
     }
@@ -55,8 +73,10 @@ contract Whitelistable is Initializable, Operatorable {
      *       is the real contract address.
      */
     function confirmWhitelistContract() public {
-        require(whitelistPending != address(0), "Whitelistable: address of new whitelist contract can not be zero");
-        require(msg.sender == whitelistPending, "Whitelistable: should be called from new whitelist contract");
+        if (whitelistPending == address(0)) revert WhitelistableWhitelistContractZeroAddress();
+
+        if (msg.sender != whitelistPending) revert WhitelistableCallerNotWhitelistContract(msg.sender);
+
         _setWhitelistContract(whitelistPending);
     }
 
@@ -83,7 +103,8 @@ contract Whitelistable is Initializable, Operatorable {
 
     /** INTERNAL FUNCTIONS */
     function _setWhitelistContract(address _whitelist) internal {
-        require(_whitelist != address(0), "Whitelistable: address of new whitelist contract cannot be zero");
+        if (_whitelist == address(0)) revert WhitelistableWhitelistContractZeroAddress();
+
         whitelistInst = IWhitelist(_whitelist);
         emit WhitelistContractChanged(msg.sender, _whitelist);
     }
